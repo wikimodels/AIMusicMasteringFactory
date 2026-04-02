@@ -23,6 +23,11 @@ env/
 # ─── Audio working dirs ─────────────────────────────────────
 input_wav/
 output_wav/
+analysis/
+output_mp3_drops/
+output_mp3_drops/
+video_input/
+video_output/
 
 # ─── OS junk ────────────────────────────────────────────────
 .DS_Store
