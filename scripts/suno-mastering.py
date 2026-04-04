@@ -38,26 +38,25 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
 # ─── Init ─────────────────────────────────────────────────────────────────────
-load_dotenv()
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID   = os.getenv("TELEGRAM_CHAT_ID")
 
-INPUT_DIR    = Path("input_wav")
-OUTPUT_DIR   = Path("output_wav")
+INPUT_DIR    = Path("sound/wav_input")
+OUTPUT_DIR   = Path("sound/wav_output")
 ANALYSIS_DIR = Path("analysis")
-DROPS_DIR    = Path("output_mp3_drops")
+DROPS_DIR    = Path("sound/mp3_drops_output")
 METADATA_FILE = Path("metadata.json")
-INPUT_DIR.mkdir(exist_ok=True)
-OUTPUT_DIR.mkdir(exist_ok=True)
-ANALYSIS_DIR.mkdir(exist_ok=True)
-DROPS_DIR.mkdir(exist_ok=True)
+INPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+ANALYSIS_DIR.mkdir(parents=True, exist_ok=True)
+DROPS_DIR.mkdir(parents=True, exist_ok=True)
 
 console = Console(legacy_windows=False)
 
-DSP_STEPS = 5  # HPF, M/S EQ+Widen, Saturation, De-harsh, Save
-SLICE_DURATION   = 35  # Total drop length (seconds)
-PRE_DROP_TENSION = 6   # Seconds of build-up (tension) before the main drop
+DSP_STEPS = 4  # HPF, M/S EQ+Widen, Saturation, De-harsh, Save
 
 
 # ─── Telegram ─────────────────────────────────────────────────────────────────
@@ -328,51 +327,7 @@ def compare_spectra(original: Path, master: Path, stem: str) -> Path:
     return out_png
 
 
-# ─── Drop Sniper Logic ───────────────────────────────────────────────────────
-def find_best_drop_logic(y: np.ndarray, sr: int) -> tuple:
-    """Finds the most energetic 25s slice based on RMS."""
-    rms = librosa.feature.rms(y=y)[0]
-    frames_per_sec = sr / 512
-    window_length  = int(5 * frames_per_sec) 
-    smoothed_rms   = np.convolve(rms, np.ones(window_length)/window_length, mode='valid')
-    drop_frame     = np.argmax(smoothed_rms)
-    drop_time_sec  = librosa.frames_to_time(drop_frame, sr=sr)
-    
-    start_time_sec = max(0, drop_time_sec - PRE_DROP_TENSION)
-    end_time_sec   = start_time_sec + SLICE_DURATION
-    
-    # Ensure it doesn't exceed file length
-    total_sec = len(y) / sr
-    if end_time_sec > total_sec:
-        end_time_sec = total_sec
-        start_time_sec = max(0, end_time_sec - SLICE_DURATION)
-        
-    return start_time_sec, SLICE_DURATION
 
-
-def create_drop_snippet(master_wav: Path, out_mp3: Path, start: float, dur: float, meta: dict) -> bool:
-    """Extracts a snippet, applies 2s fade in/out, and encodes to 320kbps MP3."""
-    fade_out_start = dur - 2.0
-    filter_str = f"afade=t=in:ss=0:d=2,afade=t=out:st={fade_out_start:.3f}:d=2"
-    
-    cmd = [
-        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
-        "-i", str(master_wav),
-        "-ss", str(start), "-t", str(dur),
-        "-map_metadata", "-1"
-    ]
-    if "title" in meta: cmd.extend(["-metadata", f"title={meta['title']}"])
-    if "artist" in meta: cmd.extend(["-metadata", f"artist={meta['artist']}"])
-    if "album" in meta: cmd.extend(["-metadata", f"album={meta['album']}"])
-    if "year" in meta: cmd.extend(["-metadata", f"year={meta['year']}"])
-    if "comment" in meta: cmd.extend(["-metadata", f"comment={meta['comment']}"])
-    
-    cmd.extend([
-        "-filter_complex", filter_str,
-        "-b:a", "320k",
-        str(out_mp3)
-    ])
-    return subprocess.run(cmd).returncode == 0
 
 
 # ─── ffmpeg loudnorm ──────────────────────────────────────────────────────────
@@ -443,11 +398,10 @@ def render_report(stem: str, m: dict):
     return tbl, lines
 
 
-def tg_report(stem: str, dur: float, metrics: list, drop_ok: bool = False) -> str:
+def tg_report(stem: str, dur: float, metrics: list) -> str:
     """Formats a single track report for Telegram."""
     stats = "\n".join(metrics)
-    drop_status = "🎯 Drop exported" if drop_ok else "⚪ No drop"
-    return f"🎵 <b>{stem}</b>\n{stats}\n⏱ {dur:.1f}s | {drop_status}"
+    return f"🎵 <b>{stem}</b>\n{stats}\n⏱ {dur:.1f}s"
 
 
 def main():
@@ -520,7 +474,16 @@ def main():
                         out_stem = clean_title
             
             tmp_wav = OUTPUT_DIR / f"{out_stem}_tmp.wav"
-            out_wav = OUTPUT_DIR / f"{out_stem}_MASTER.wav"
+            out_wav = OUTPUT_DIR / f"{out_stem}.wav"
+            
+            # Проверки на то, что файл уже существует (продолжение работы после остановки)
+            if out_wav.exists():
+                console.rule(f"[bold magenta][{idx}/{len(files)}] {stem} → {out_stem}[/bold magenta]")
+                console.print("  [dim]⏭️ Уже обработан (существует в wav_output). Пропускаю...[/dim]\n")
+                results.append(out_wav)
+                progress.advance(overall)
+                continue
+
             t0      = time.time()
 
             console.rule(f"[bold magenta][{idx}/{len(files)}] {stem} → {out_stem}[/bold magenta]")
@@ -574,24 +537,7 @@ def main():
             except Exception as e:
                 progress.update(task4, description=f"[yellow]⚠️  Analysis skipped: {e}")
 
-            # ── Step 5: Drop Sniper
-            task5 = progress.add_task("[yellow]🎯 Drop Sniper (320k MP3)", total=None)
-            drop_exported = False
-            try:
-                y_master, sr_master = librosa.load(str(out_wav), sr=22050)
-                start_sec, dur_sec = find_best_drop_logic(y_master, sr_master)
-                
-                out_mp3 = DROPS_DIR / f"{out_stem}_DROP.mp3"
-                if create_drop_snippet(out_wav, out_mp3, start_sec, dur_sec, meta):
-                    progress.update(task5, description="[green]✅ Drop exported", completed=1, total=1)
-                    console.print(f"  [dim]🎯  →  [bold]{out_mp3}[/bold][/dim]\n")
-                    drop_exported = True
-                else:
-                    progress.update(task5, description="[red]❌ Snipe failed")
-            except Exception as e:
-                progress.update(task5, description=f"[yellow]⚠️  Sniper skipped: {e}")
-
-            tg_lines.append(tg_report(out_stem, duration, report_lines, drop_ok=drop_exported))
+            tg_lines.append(tg_report(out_stem, duration, report_lines))
             results.append(out_wav)
             progress.advance(overall)
 

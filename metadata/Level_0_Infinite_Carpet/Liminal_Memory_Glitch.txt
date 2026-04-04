@@ -1,0 +1,154 @@
+﻿Metadata for: Liminal_Memory_Glitch.wav
+Generated: 2026-04-02T21:52:22.403Z
+
+--- Track Information ---
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Liminal slow phonk at 70 BPM with sparse metal clanks drenched in spring reverb tail, rare vibraphone notes only at transitions, and heavy 808 sub-bass sidechained hard yet kept dry. Muffled lo-fi drums in a tight room, tunnel echo pads, subtle minor chord layers, tape wow/flutter, 12-bit sampler grit, low-pass at 6 kHz, no vocals, 2:30 with no fade before 2:15.
+
+--- Lyrics ---
+[Intro]
+(vinyl crackle, single vibraphone note, 808 rumble rises slowly)
+
+[Verse]
+(slow 808 groove, metal clank accent, muffled hi-hats, faint radio murmur in background)
+
+[Pre-Drop]
+(murmur gets slightly louder, beat-stop, silence)
+
+[Drop]
+(massive sidechain 808 punch, slow heavy drums, pads swell, murmur buried deep)
+
+[Verse 2]
+(bass stutter, tunnel echo, metal clank on beat 3, murmur drifts in and out)
+
+[Pre-Drop]
+(full stop, longer silence, murmur only)
+
+[Drop 2]
+(heavier than before, peak sidechain 808, crushing slow groove)
+
+[Breakdown]
+(no drums, solo 808 drag, one vibraphone note long cave reverb, murmur rises then fades to static)
+
+[Final Drop]
+(all elements max, slow punishing groove, murmur completely gone)
+
+[Outro]
+(808 slows, two vibraphone notes dissolve, vinyl hiss to black)
+
+Cover Art URL: https://cdn2.suno.ai/image_4c4993c4-7c0f-40ca-b272-b1287e548dac.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "",
+  "play_count": 1,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "id": "4c4993c4-7c0f-40ca-b272-b1287e548dac",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/4c4993c4-7c0f-40ca-b272-b1287e548dac.mp3",
+  "audio_url_2": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/4c4993c4-7c0f-40ca-b272-b1287e548dac.m4a",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/4c4993c4-7c0f-40ca-b272-b1287e548dac.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/4c4993c4-7c0f-40ca-b272-b1287e548dac.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_4c4993c4-7c0f-40ca-b272-b1287e548dac.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_4c4993c4-7c0f-40ca-b272-b1287e548dac.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "Liminal slow phonk at 70 BPM with sparse metal clanks drenched in spring reverb tail, rare vibraphone notes only at transitions, and heavy 808 sub-bass sidechained hard yet kept dry. Muffled lo-fi drums in a tight room, tunnel echo pads, subtle minor chord layers, tape wow/flutter, 12-bit sampler grit, low-pass at 6 kHz, no vocals, 2:30 with no fade before 2:15.",
+    "prompt": "[Intro]\n(vinyl crackle, single vibraphone note, 808 rumble rises slowly)\n\n[Verse]\n(slow 808 groove, metal clank accent, muffled hi-hats, faint radio murmur in background)\n\n[Pre-Drop]\n(murmur gets slightly louder, beat-stop, silence)\n\n[Drop]\n(massive sidechain 808 punch, slow heavy drums, pads swell, murmur buried deep)\n\n[Verse 2]\n(bass stutter, tunnel echo, metal clank on beat 3, murmur drifts in and out)\n\n[Pre-Drop]\n(full stop, longer silence, murmur only)\n\n[Drop 2]\n(heavier than before, peak sidechain 808, crushing slow groove)\n\n[Breakdown]\n(no drums, solo 808 drag, one vibraphone note long cave reverb, murmur rises then fades to static)\n\n[Final Drop]\n(all elements max, slow punishing groove, murmur completely gone)\n\n[Outro]\n(808 slows, two vibraphone notes dissolve, vinyl hiss to black)",
+    "type": "gen",
+    "duration": 208.04,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-01T11:41:02.675Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "4c4993c4-7c0f-40ca-b272-b1287e548dac",
+    "updated_at": "2026-04-01T11:48:52.159Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "a8f2d161-c229-4477-bf7f-213d7ff9d1b4",
+    "name": "Liminal Phonk",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "phonk, lo-fi, dark ambient",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0
+}

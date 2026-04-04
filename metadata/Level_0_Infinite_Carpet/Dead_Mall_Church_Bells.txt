@@ -1,0 +1,163 @@
+﻿Metadata for: Dead_Mall_Church_Bells.wav
+Generated: 2026-04-02T21:48:16.996Z
+
+--- Track Information ---
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: dark liminal phonk, deep 808 bass, eerie FM synth plucks, atmospheric, cinematic tension, lo-fi tape saturation, instrumental, 100 BPM
+
+--- Lyrics ---
+[Intro]
+[Empty room reverb]
+[Low ominous drone]
+[Tape hiss]
+
+[Build-up]
+[Slow distorted 808 kick]
+[Dark analog synth slowly rising]
+[Tension]
+
+[Drop]
+[Aggressive heavy 808 bass]
+[Rhythmic metallic synth pluck]
+[Crisp trap hi-hats]
+
+[Breakdown]
+[Beat completely stops]
+[Dead silence]
+[One distant distorted vocal mumble]
+[Eerie background hum]
+
+[Build-up 2]
+[Fast snare roll]
+[Glitching synth fill]
+[Heavy anticipation]
+
+[Climax Drop]
+[Massive 808 overdrive]
+[Deep church bell melody mixed with heavy bass]
+[Dark phonk groove]
+
+[Outro]
+[Beat slows down dramatically]
+[Bass fading out]
+[Creepy echoing synth]
+
+[End]
+
+Cover Art URL: https://cdn2.suno.ai/image_ca1152c0-34db-43ac-ae09-8df69a5a2969.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "",
+  "play_count": 1,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "id": "ca1152c0-34db-43ac-ae09-8df69a5a2969",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/ca1152c0-34db-43ac-ae09-8df69a5a2969.mp3",
+  "audio_url_2": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/ca1152c0-34db-43ac-ae09-8df69a5a2969.m4a",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/ca1152c0-34db-43ac-ae09-8df69a5a2969.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/ca1152c0-34db-43ac-ae09-8df69a5a2969.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_ca1152c0-34db-43ac-ae09-8df69a5a2969.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_ca1152c0-34db-43ac-ae09-8df69a5a2969.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "dark liminal phonk, deep 808 bass, eerie FM synth plucks, atmospheric, cinematic tension, lo-fi tape saturation, instrumental, 100 BPM",
+    "negative_tags": "no cowbells",
+    "prompt": "[Intro]\n[Empty room reverb]\n[Low ominous drone]\n[Tape hiss]\n\n[Build-up]\n[Slow distorted 808 kick]\n[Dark analog synth slowly rising]\n[Tension]\n\n[Drop]\n[Aggressive heavy 808 bass]\n[Rhythmic metallic synth pluck]\n[Crisp trap hi-hats]\n\n[Breakdown]\n[Beat completely stops]\n[Dead silence]\n[One distant distorted vocal mumble]\n[Eerie background hum]\n\n[Build-up 2]\n[Fast snare roll]\n[Glitching synth fill]\n[Heavy anticipation]\n\n[Climax Drop]\n[Massive 808 overdrive]\n[Deep church bell melody mixed with heavy bass]\n[Dark phonk groove]\n\n[Outro]\n[Beat slows down dramatically]\n[Bass fading out]\n[Creepy echoing synth]\n\n[End]",
+    "type": "gen",
+    "duration": 167.88,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-01T13:01:42.290Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "ca1152c0-34db-43ac-ae09-8df69a5a2969",
+    "updated_at": "2026-04-01T13:06:03.075Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "a8f2d161-c229-4477-bf7f-213d7ff9d1b4",
+    "name": "Liminal Phonk",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "phonk, lo-fi, cinematic/eerie electronic",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0
+}

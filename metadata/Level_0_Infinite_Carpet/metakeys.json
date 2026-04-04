@@ -1,0 +1,52 @@
+{
+    "_comment": "Шаблон SEO-метаданных для альбома. Подставляется в process_batch.py при записи тегов в WAV.",
+
+    "album": "Level 0: Infinite Carpet",
+    "artist": "VRNOX",
+    "year": "2026",
+    "copyright": "2026 VRNOX",
+
+    "genre": "Liminal Phonk; Trap; Dark Ambient; Lo-Fi; Atmospheric; Backrooms",
+
+    "genre_tags_explanation": [
+        "Liminal Phonk — основной жанр, главный поисковый запрос",
+        "Trap — алгоритм относит к mainstream trap, расширяет охват",
+        "Dark Ambient — кросс-жанровая аудитория (Spotify отдельная ниша)",
+        "Lo-Fi — самый большой study/focus пул плейлистов",
+        "Atmospheric — дополнительный дескриптор для editorial питчинга",
+        "Backrooms — лор-тег, ловит трафик A24/YouTube поиска"
+    ],
+
+    "comment_template": "Liminal phonk from Level 0: Infinite Carpet. {TRACK_VIBE}. For focus, ADHD, sleep, backrooms aesthetic.",
+
+    "keywords_ikey": "backrooms, liminal, phonk, trap, lo-fi, dark ambient, anemoia, level 0, noclip, focus music",
+
+    "track_vibes": {
+        "Cave_Echo_Anemoia": "Cave echo, suffocating reverb, anemoia, false memory",
+        "Anemoia_Slowed_Pitched_Down": "Distorted memory, slow trap, pitch drift, dreamcore",
+        "Poolrooms_at_3AM": "Poolrooms aesthetic, deep 808, 3AM loop, isolated",
+        "Concrete_Basement_Drone": "Concrete walls, drone bass, suffocating atmosphere",
+        "Level_0_Suffocation": "Level 0 backrooms, deep sub bass, phonk drone",
+        "Dissociative_Episode": "Dissociation, derealization, floating synths, slowed",
+        "Empty_Hallway_Phonk": "Empty corridor, halogen buzz, late night phonk",
+        "Core_Memory_Glitch": "Glitch, fragmented memory, digital artifact, trap",
+        "The_Void_Level": "Void, black level, pure bass, no exit",
+        "Corporate_Liminal": "Office horror, Severance aesthetic, fluorescent liminal",
+        "Intrusive_Thoughts": "ADHD phonk, intrusive loop, mental static, trap",
+        "Existential_Dread": "Existential void, cinematic tension, drone",
+        "Backrooms_A24_Drift": "Backrooms 2026, A24 film, noclip, found footage phonk",
+        "Level_188_Liminal_Hotel": "Liminal hotel, Level 188, corridor loop, carpet buzz",
+        "The_Suburbs_Are_Repeating": "Eternal suburb, dreamcore, suburban horror, dusk loop",
+        "Urbancore_Nightwalk": "3AM city, urbancore, streetlight phonk, empty streets",
+        "Severance_Office": "Severance TV, Lumon, office liminal, corporate horror",
+        "Muffled_Screams_Underwater": "Underwater reverb, muffled, submerged, pool phonk",
+        "Cryptidcore": "Cryptid, paranormal, dark forest, lo-fi horror",
+        "Threshold_State": "Threshold, liminal transition, between worlds, ambient",
+        "Rain_on_Window_Wave_Phonk": "Rain ASMR phonk, window condensation, night drive",
+        "Liminal_Memory_Glitch": "Memory error, VHS glitch, liminal nostalgia",
+        "The_Music_From_a_Room_That_Doesnt_Exist": "Paranormal audio, ghost room, unreachable space",
+        "Dead_Mall_Church_Bells": "Dead mall, abandoned retail, church bell reverb, lonely",
+        "Sub-Bass_Rumble_in_Empty_Corridors": "Sub bass, empty corridor, 808 rumble, backrooms",
+        "Youve_Been_Here_Before": "Deja vu, false memory, anemoia, liminal recall"
+    }
+}

@@ -1,0 +1,163 @@
+﻿Metadata for: Dissociative_Episode.wav
+Generated: 2026-04-02T21:51:31.838Z
+
+--- Track Information ---
+Title: Dissociative Episode
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: liminal phonk, atmospheric, phonk chants, distorted muffled vocals, deep 808 bass, dark lo-fi, slow drift cowbell, eerie reverb, 70 BPM
+
+--- Lyrics ---
+[Intro]
+[Eerie ambient noise]
+[Distant muffled phonk chants]
+[Low-pass filter]
+
+[Build-up]
+[Repetitive distorted vocal loop]
+[Rising bass tension]
+
+[Drop]
+[Heavy hitting 808]
+[Mumbled vocal samples integrated into rhythm]
+[Dark cowbell melody]
+[Liminal atmosphere]
+
+[Verse]
+[Beat continues]
+[Occasional chopped and screwed whispers]
+[Deep reverb on vocals]
+
+[Bridge/Interlude]
+[Bass drops out]
+[Empty hallway ambiance]
+[Distorted radio chatter mumbling]
+
+[Drop 2]
+[Aggressive bass return]
+[Rhythmic phonk vocal chants]
+[Glitch effects]
+
+[Outro]
+[Slowed and reverb]
+[Vocal samples fading into static]
+[Distant echoing mutter]
+
+[Fade Out]
+[End]
+
+Cover Art URL: https://cdn2.suno.ai/image_de07c70f-7ad0-4166-a8f6-09290ce8836e.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Liminal_Phonk_Gemini_1",
+  "play_count": 2,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "id": "de07c70f-7ad0-4166-a8f6-09290ce8836e",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/de07c70f-7ad0-4166-a8f6-09290ce8836e.mp3",
+  "audio_url_2": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/de07c70f-7ad0-4166-a8f6-09290ce8836e.m4a",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/de07c70f-7ad0-4166-a8f6-09290ce8836e.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/de07c70f-7ad0-4166-a8f6-09290ce8836e.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_de07c70f-7ad0-4166-a8f6-09290ce8836e.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_de07c70f-7ad0-4166-a8f6-09290ce8836e.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "liminal phonk, atmospheric, phonk chants, distorted muffled vocals, deep 808 bass, dark lo-fi, slow drift cowbell, eerie reverb, 70 BPM",
+    "prompt": "[Intro]\n[Eerie ambient noise]\n[Distant muffled phonk chants]\n[Low-pass filter]\n\n[Build-up]\n[Repetitive distorted vocal loop]\n[Rising bass tension]\n\n[Drop]\n[Heavy hitting 808]\n[Mumbled vocal samples integrated into rhythm]\n[Dark cowbell melody]\n[Liminal atmosphere]\n\n[Verse]\n[Beat continues]\n[Occasional chopped and screwed whispers]\n[Deep reverb on vocals]\n\n[Bridge/Interlude]\n[Bass drops out]\n[Empty hallway ambiance]\n[Distorted radio chatter mumbling]\n\n[Drop 2]\n[Aggressive bass return]\n[Rhythmic phonk vocal chants]\n[Glitch effects]\n\n[Outro]\n[Slowed and reverb]\n[Vocal samples fading into static]\n[Distant echoing mutter]\n\n[Fade Out]\n[End]",
+    "type": "gen",
+    "duration": 167.32,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-01T11:49:57.953Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 2,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "de07c70f-7ad0-4166-a8f6-09290ce8836e",
+    "updated_at": "2026-04-01T12:12:04.973Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "a8f2d161-c229-4477-bf7f-213d7ff9d1b4",
+    "name": "Liminal Phonk",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "phonk, lo-fi, atmospheric",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0
+}

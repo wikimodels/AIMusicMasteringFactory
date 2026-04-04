@@ -20,14 +20,33 @@ build/
 venv/
 env/
 
-# ─── Audio working dirs ─────────────────────────────────────
-input_wav/
-output_wav/
-analysis/
-output_mp3_drops/
-output_mp3_drops/
-video_input/
-video_output/
+# ─── Media Working Directories (DO NOT COMMIT RAW MEDIA) ───
+sound/wav_input/*
+sound/wav_output/*
+sound/mp3_drops_output/*
+video/video_input/*
+video/video_output/*
+analysis/*
+
+# Оставляем пустые папки в гите (если создадим .gitkeep)
+!sound/wav_input/.gitkeep
+!sound/wav_output/.gitkeep
+!sound/mp3_drops_output/.gitkeep
+!video/video_input/.gitkeep
+!video/video_output/.gitkeep
+!analysis/.gitkeep
+
+# ─── Медиафайлы (глобально) ─────────────────────────────────
+# Жестко запрещаем пушить медийный шлак из любого места
+*.wav
+*.mp3
+*.flac
+*.m4a
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.png
 
 # ─── OS junk ────────────────────────────────────────────────
 .DS_Store

@@ -1,0 +1,171 @@
+﻿Metadata for: Backrooms_A24_Drift.wav
+Generated: 2026-04-02T21:47:07.172Z
+
+--- Track Information ---
+Title: Backrooms A24 Drift
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: liminal drift phonk, hypnagogic, extremely deep 808 bass, eerie analog pads, lo-fi tape hiss, atmospheric, cinematic, 105 BPM
+
+--- Lyrics ---
+[Intro]
+[Empty backrooms ambiance]
+[Low-pass filtered tape noise]
+[Slow pulsating bass drone]
+
+[Build-up]
+[Muffled 808 kick drum]
+[Distant phonk chants echoing]
+[Rising tension]
+
+[Drop 1]
+[Heavy distorted 808 bassline]
+[Dark drifting synth melody]
+[Crisp hi-hats]
+[No cowbells]
+
+[Breakdown]
+[All drums cut out]
+[Sudden hollow silence]
+[One creepy distorted mumble]
+[Eerie VHS static]
+
+[Bridge / Key Change]
+[Abrupt shift to higher musical key]
+[Dramatic chord modulation]
+[Atmospheric pad swelling]
+[Beat switch]
+
+[Climax Drop]
+[Aggressive 808 overdrive]
+[New lead synth melody in higher pitch]
+[Intense dark phonk groove]
+[Glitch effects]
+
+[Outro]
+[Slowed and reverb]
+[Pitch shifting down]
+[Bass fading into white noise]
+
+[End]
+[Silence]
+
+Cover Art URL: https://cdn2.suno.ai/image_ca3b2c44-512a-45c1-b4b3-763b2605baad.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Liminal_Phonk_Gemini_5",
+  "play_count": 2,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "id": "ca3b2c44-512a-45c1-b4b3-763b2605baad",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/ca3b2c44-512a-45c1-b4b3-763b2605baad.mp3",
+  "audio_url_2": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/ca3b2c44-512a-45c1-b4b3-763b2605baad.m4a",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/ca3b2c44-512a-45c1-b4b3-763b2605baad.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/ca3b2c44-512a-45c1-b4b3-763b2605baad.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_ca3b2c44-512a-45c1-b4b3-763b2605baad.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_ca3b2c44-512a-45c1-b4b3-763b2605baad.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "liminal drift phonk, hypnagogic, extremely deep 808 bass, eerie analog pads, lo-fi tape hiss, atmospheric, cinematic, 105 BPM",
+    "negative_tags": "no cowbells",
+    "prompt": "[Intro]\n[Empty backrooms ambiance]\n[Low-pass filtered tape noise]\n[Slow pulsating bass drone]\n\n[Build-up]\n[Muffled 808 kick drum]\n[Distant phonk chants echoing]\n[Rising tension]\n\n[Drop 1]\n[Heavy distorted 808 bassline]\n[Dark drifting synth melody]\n[Crisp hi-hats]\n[No cowbells]\n\n[Breakdown]\n[All drums cut out]\n[Sudden hollow silence]\n[One creepy distorted mumble]\n[Eerie VHS static]\n\n[Bridge / Key Change]\n[Abrupt shift to higher musical key]\n[Dramatic chord modulation]\n[Atmospheric pad swelling]\n[Beat switch]\n\n[Climax Drop]\n[Aggressive 808 overdrive]\n[New lead synth melody in higher pitch]\n[Intense dark phonk groove]\n[Glitch effects]\n\n[Outro]\n[Slowed and reverb]\n[Pitch shifting down]\n[Bass fading into white noise]\n\n[End]\n[Silence]",
+    "type": "gen",
+    "duration": 187.2,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "control_sliders": {
+      "style_weight": 0.51
+    },
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-01T13:17:17.048Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 2,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "ca3b2c44-512a-45c1-b4b3-763b2605baad",
+    "updated_at": "2026-04-01T13:51:00.549Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "a8f2d161-c229-4477-bf7f-213d7ff9d1b4",
+    "name": "Liminal Phonk",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "phonk, hypnagogic, cinematic",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0
+}

@@ -1,0 +1,154 @@
+﻿Metadata for: Cryptidcore.wav
+Generated: 2026-04-02T21:45:59.829Z
+
+--- Track Information ---
+Title: Cryptidcore
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: Dark liminal phonk, industrial metal hits, heavy anvil percussion, extremely deep 808 bass, eerie analog drone, lo-fi, 100 BPM
+
+--- Lyrics ---
+[Intro]
+[Empty industrial warehouse ambiance]
+[Cold metal scraping sounds]
+[Low ominous drone]
+
+[Build-up]
+[Muffled distorted 808 kick drum]
+[Distant phonk vocal echoes]
+[Rising tension]
+
+[Drop 1]
+[Heavy distorted 808 bass]
+[Rhythmic industrial metal hits]
+[Deep metallic resonance]
+[No high-pitched cowbells]
+
+[Breakdown]
+[Beat stops abruptly]
+[Dead silence]
+[Muffled schizophrenic mumbling]
+[Heavy reverb and tape static]
+
+[Bridge / Key Change]
+[Sudden shift to a lower, darker key]
+[Dark ambient pad swelling]
+[Dissonant chord change]
+[Beat switch]
+
+[Climax Drop]
+[Maximum 808 bass overdrive]
+[Heavy iron anvil strikes on every beat]
+[Aggressive dark phonk groove]
+[New modulated synth lead]
+
+[Outro]
+[Beat slows down to a crawl]
+[Pitch shifting down]
+[Fading into mechanical hum]
+
+[End]
+
+Cover Art URL: https://cdn2.suno.ai/image_367addca-ef7a-4d5c-ae69-8c999cfe3b6f.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Liminal_Phonk_Gemini_7",
+  "play_count": 1,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "id": "367addca-ef7a-4d5c-ae69-8c999cfe3b6f",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/367addca-ef7a-4d5c-ae69-8c999cfe3b6f.mp3",
+  "audio_url_2": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/367addca-ef7a-4d5c-ae69-8c999cfe3b6f.m4a",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/367addca-ef7a-4d5c-ae69-8c999cfe3b6f.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/367addca-ef7a-4d5c-ae69-8c999cfe3b6f.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_367addca-ef7a-4d5c-ae69-8c999cfe3b6f.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_367addca-ef7a-4d5c-ae69-8c999cfe3b6f.jpeg",
+  "major_model_version": "v4.5+",
+  "model_name": "chirp-bluejay",
+  "metadata": {
+    "tags": "Dark liminal phonk, industrial metal hits, heavy anvil percussion, extremely deep 808 bass, eerie analog drone, lo-fi, 100 BPM",
+    "negative_tags": "no cowbells",
+    "prompt": "[Intro]\n[Empty industrial warehouse ambiance]\n[Cold metal scraping sounds]\n[Low ominous drone]\n\n[Build-up]\n[Muffled distorted 808 kick drum]\n[Distant phonk vocal echoes]\n[Rising tension]\n\n[Drop 1]\n[Heavy distorted 808 bass]\n[Rhythmic industrial metal hits]\n[Deep metallic resonance]\n[No high-pitched cowbells]\n\n[Breakdown]\n[Beat stops abruptly]\n[Dead silence]\n[Muffled schizophrenic mumbling]\n[Heavy reverb and tape static]\n\n[Bridge / Key Change]\n[Sudden shift to a lower, darker key]\n[Dark ambient pad swelling]\n[Dissonant chord change]\n[Beat switch]\n\n[Climax Drop]\n[Maximum 808 bass overdrive]\n[Heavy iron anvil strikes on every beat]\n[Aggressive dark phonk groove]\n[New modulated synth lead]\n\n[Outro]\n[Beat slows down to a crawl]\n[Pitch shifting down]\n[Fading into mechanical hum]\n\n[End]",
+    "type": "gen",
+    "duration": 134.76,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": false,
+    "model_badges": {
+      "songrow": {
+        "display_name": "v4.5+",
+        "light": {
+          "text_color": "7D7C83",
+          "background_color": "00000000",
+          "border_color": "0000001A"
+        },
+        "dark": {
+          "text_color": "A3A3A3",
+          "background_color": "00000000",
+          "border_color": "FFFFFF1A"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-01T13:52:30.511Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "367addca-ef7a-4d5c-ae69-8c999cfe3b6f",
+    "updated_at": "2026-04-01T13:55:49.636Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "a8f2d161-c229-4477-bf7f-213d7ff9d1b4",
+    "name": "Liminal Phonk",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "phonk, industrial metal, lo-fi",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0
+}

@@ -1,0 +1,159 @@
+﻿Metadata for: Cave_Echo_Anemoia.wav
+Generated: 2026-04-02T21:53:34.007Z
+
+--- Track Information ---
+Title: Cave Echo Anemoia
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: liminal slow phonk, 60 BPM, dark tape-warped cowbell loop, heavy 808 bass sidechain ducking, muffled lo-fi drums, vinyl crackle, low-pass all highs, sub-bass heavy, cave echo ambiance, no vocals
+
+--- Lyrics ---
+[Intro]
+(vinyl crackle, distant cowbell fades in, single 808 boom)
+
+[Verse 1]
+(slow 808 groove, sticky cowbell loop, muffled hi-hats, dripping water ambiance)
+
+[Build]
+(rising tension, half-bar beat-stop, silence)
+
+[Drop]
+(massive sidechain 808 explosion, full slow drums, tape wobble on cowbell)
+
+[Verse 2]
+(chopped drum variation, tunnel echo layer, bass stutter)
+
+[Build]
+(beat-stop silence, longer this time)
+
+[Drop]
+(heavier than before, peak sidechain pump, low rumble)
+
+[Bridge]
+(breakdown: solo 808 drag, no drums, cave ambiance only)
+
+[Final Drop]
+(everything maxed, slow punishing groove)
+
+[Outro]
+(808 slows, cowbell fades, vinyl hiss to silence)
+
+Cover Art URL: https://cdn2.suno.ai/image_acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Liminal Phonk_1",
+  "play_count": 3,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "id": "acc08cfe-76cf-4457-8c1a-5f7ab9f2225c",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.mp3",
+  "audio_url_2": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.m4a",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_acc08cfe-76cf-4457-8c1a-5f7ab9f2225c.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "liminal slow phonk, 60 BPM, dark tape-warped cowbell loop, heavy 808 bass sidechain ducking, muffled lo-fi drums, vinyl crackle, low-pass all highs, sub-bass heavy, cave echo ambiance, no vocals",
+    "prompt": "[Intro]\n(vinyl crackle, distant cowbell fades in, single 808 boom)\n\n[Verse 1]\n(slow 808 groove, sticky cowbell loop, muffled hi-hats, dripping water ambiance)\n\n[Build]\n(rising tension, half-bar beat-stop, silence)\n\n[Drop]\n(massive sidechain 808 explosion, full slow drums, tape wobble on cowbell)\n\n[Verse 2]\n(chopped drum variation, tunnel echo layer, bass stutter)\n\n[Build]\n(beat-stop silence, longer this time)\n\n[Drop]\n(heavier than before, peak sidechain pump, low rumble)\n\n[Bridge]\n(breakdown: solo 808 drag, no drums, cave ambiance only)\n\n[Final Drop]\n(everything maxed, slow punishing groove)\n\n[Outro]\n(808 slows, cowbell fades, vinyl hiss to silence)",
+    "type": "gen",
+    "duration": 131.76,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "control_sliders": {
+      "style_weight": 0.6,
+      "weirdness_constraint": 0.4
+    },
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-01T10:56:45.026Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 2,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "acc08cfe-76cf-4457-8c1a-5f7ab9f2225c",
+    "updated_at": "2026-04-01T11:05:30.371Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "a8f2d161-c229-4477-bf7f-213d7ff9d1b4",
+    "name": "Liminal Phonk",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "phonk, lo-fi, dark ambient",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0
+}
