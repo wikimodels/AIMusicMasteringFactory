@@ -1313,33 +1313,9 @@
   </div>
 
   <div class="header-stats">
-    <div class="stat-chip">
-      <span class="stat-pip origin"></span>
-      <span>Origin</span>
-      <span class="stat-num" id="cnt-origin">0</span>
-    </div>
-    <div class="stat-chip">
-      <span class="stat-pip redo"></span>
-      <span>Redo</span>
-      <span class="stat-num" id="cnt-redo">0</span>
-    </div>
-    <div class="stat-chip">
-      <span class="stat-pip disliked"></span>
-      <span>Disliked</span>
-      <span class="stat-num" id="cnt-disliked">0</span>
-    </div>
-    <div class="stat-chip">
-      <span class="stat-pip liked"></span>
-      <span>Liked</span>
-      <span class="stat-num" id="cnt-liked">0</span>
-    </div>
-    <div class="stat-chip">
-      <span class="stat-pip cuts"></span>
-      <span>Cuts</span>
-      <span class="stat-num" id="cnt-cuts">0</span>
-    </div>
-    <label style="display:flex; align-items:center; gap:4px; margin-left:11px; cursor:pointer; font-size:10px; color:var(--txt-mid); white-space:nowrap;">
-      <input type="checkbox" id="cb-select-all" class="card-checkbox" title="Select / Deselect All">
+    <span id="cnt-origin" style="display:none;">0</span>
+    <label class="btn-view-list" style="cursor:pointer; user-select:none;">
+      <input type="checkbox" id="cb-select-all" class="card-checkbox" style="margin:0;" title="Select / Deselect All">
       Select All
     </label>
     <button class="btn-view-list disliked" id="btn-delete-selected" title="Delete all checked tracks" style="display:none; margin-left:11px;">
@@ -1349,10 +1325,10 @@
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Upload
     </button>
-    <button class="btn-view-list redo"   id="btn-show-redo"   title="Full list of Redo tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg> Redo</button>
-    <button class="btn-view-list disliked" id="btn-show-disliked" title="Full list of Disliked tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Disliked</button>
-    <button class="btn-view-list liked"  id="btn-show-liked"  title="Full list of Liked tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Liked</button>
-    <button class="btn-view-list cuts"  id="btn-show-cuts"  title="Full list of Cut tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 9 19 4.5M9.5 9 5 4.5M14.5 15 19 19.5M9.5 15 5 19.5M5 9l14 10M19 9 5 19"/></svg> Cuts</button>
+    <button class="btn-view-list redo"   id="btn-show-redo"   title="Full list of Redo tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg> Redo <span id="cnt-redo" style="display:none;">0</span></button>
+    <button class="btn-view-list disliked" id="btn-show-disliked" title="Full list of Disliked tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Disliked <span id="cnt-disliked" style="display:none;">0</span></button>
+    <button class="btn-view-list liked"  id="btn-show-liked"  title="Full list of Liked tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Liked <span id="cnt-liked" style="display:none;">0</span></button>
+    <button class="btn-view-list cuts"  id="btn-show-cuts"  title="Full list of Cut tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 9 19 4.5M9.5 9 5 4.5M14.5 15 19 19.5M9.5 15 5 19.5M5 9l14 10M19 9 5 19"/></svg> Cuts <span class="stat-pip cuts" style="margin-left: 6px;"></span><span id="cnt-cuts" style="margin-left: 2px;">0</span></button>
     <button class="btn-view-list" id="btn-search" title="Search tracks" style="color:var(--txt-hi); border-color:var(--border-hi);">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       Search
@@ -1374,7 +1350,11 @@
     <div class="col-head">
       <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg></span>
       <span class="col-title">Redo</span>
-      <span class="col-badge" id="badge-redo">0</span>
+      <input type="checkbox" class="col-cb card-checkbox" data-col="redo" style="margin-left: auto;" title="Select all in Redo">
+      <div class="stat-chip">
+        <span class="stat-pip redo"></span>
+        <span class="stat-num" id="badge-redo">0</span>
+      </div>
     </div>
     <div class="track-list" id="list-redo">
       <div class="loading-state"><div class="spinner"></div> Loading…</div>
@@ -1385,7 +1365,11 @@
     <div class="col-head">
       <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></span>
       <span class="col-title">Disliked</span>
-      <span class="col-badge" id="badge-disliked">0</span>
+      <input type="checkbox" class="col-cb card-checkbox" data-col="disliked" style="margin-left: auto;" title="Select all in Disliked">
+      <div class="stat-chip">
+        <span class="stat-pip disliked"></span>
+        <span class="stat-num" id="badge-disliked">0</span>
+      </div>
     </div>
     <div class="track-list" id="list-disliked">
       <div class="loading-state"><div class="spinner"></div> Loading…</div>
@@ -1396,7 +1380,11 @@
     <div class="col-head">
       <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
       <span class="col-title">Liked</span>
-      <span class="col-badge" id="badge-liked">0</span>
+      <input type="checkbox" class="col-cb card-checkbox" data-col="liked" style="margin-left: auto;" title="Select all in Liked">
+      <div class="stat-chip">
+        <span class="stat-pip liked"></span>
+        <span class="stat-num" id="badge-liked">0</span>
+      </div>
     </div>
     <div class="track-list" id="list-liked">
       <div class="loading-state"><div class="spinner"></div> Loading…</div>
@@ -1407,7 +1395,11 @@
     <div class="col-head">
       <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>
       <span class="col-title">Origin</span>
-      <span class="col-badge" id="badge-origin">0</span>
+      <input type="checkbox" class="col-cb card-checkbox" data-col="origin" style="margin-left: auto;" title="Select all in Origin">
+      <div class="stat-chip">
+        <span class="stat-pip origin"></span>
+        <span class="stat-num" id="badge-origin">0</span>
+      </div>
     </div>
     <div class="track-list" id="list-origin">
       <div class="loading-state"><div class="spinner"></div> Loading…</div>
@@ -1702,6 +1694,33 @@ function updateBatchButton() {
       cbSelectAll.indeterminate = true;
     }
   }
+
+  ['origin', 'redo', 'liked', 'disliked'].forEach(col => {
+    const colCb = document.querySelector(`.col-cb[data-col="${col}"]`);
+    if (!colCb) return;
+    const colCards = document.querySelectorAll(`#list-${col} .track-card`);
+    const total = colCards.length;
+    let selected = 0;
+    colCards.forEach(c => { if (selectedCards.has(c)) selected++; });
+
+    if (total === 0) {
+      colCb.checked = false;
+      colCb.indeterminate = false;
+      colCb.disabled = true;
+    } else {
+      colCb.disabled = false;
+      if (selected === 0) {
+        colCb.checked = false;
+        colCb.indeterminate = false;
+      } else if (selected === total) {
+        colCb.checked = true;
+        colCb.indeterminate = false;
+      } else {
+        colCb.checked = false;
+        colCb.indeterminate = true;
+      }
+    }
+  });
 }
 
 cbSelectAll.addEventListener('change', (e) => {
@@ -1716,6 +1735,23 @@ cbSelectAll.addEventListener('change', (e) => {
     }
   });
   updateBatchButton();
+});
+
+document.querySelectorAll('.col-cb').forEach(colCb => {
+  colCb.addEventListener('change', (e) => {
+    const isChecked = e.target.checked;
+    const col = e.target.dataset.col;
+    const cards = document.querySelectorAll(`#list-${col} .track-card`);
+    cards.forEach(card => {
+      const cb = card.querySelector('.card-checkbox');
+      if (cb && cb.checked !== isChecked) {
+        cb.checked = isChecked;
+        if (isChecked) selectedCards.add(card);
+        else selectedCards.delete(card);
+      }
+    });
+    updateBatchButton();
+  });
 });
 
 btnDeleteSel.addEventListener('click', () => {
@@ -2056,7 +2092,7 @@ function buildCard(trackData, folder, durOpt) {
             card.querySelector('.track-name').textContent = label;
             card.querySelector('.track-name').title = newFname;
             
-            document.getElementById(`list-${targetFolder}`).appendChild(card);
+            document.getElementById(`list-${targetFolder}`).prepend(card);
             card.classList.remove('moving');
             syncCounts();
             syncEmpty(document.getElementById(`list-${fromCol}`));
