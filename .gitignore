@@ -27,6 +27,11 @@ sound/mp3_drops_output/*
 video/video_input/*
 video/video_output/*
 analysis/*
+sorting/origin/*
+sorting/liked/*
+sorting/disliked/*
+sorting/redo/*
+sorting/cuts/*
 
 # Оставляем пустые папки в гите (если создадим .gitkeep)
 !sound/wav_input/.gitkeep
@@ -58,3 +63,7 @@ desktop.ini
 .vscode/
 *.swp
 *.swo
+
+bin/ffmpeg.exe
+
+*.exe

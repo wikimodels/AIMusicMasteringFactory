@@ -1,0 +1,232 @@
+Metadata for: Lord_Have_Mercy_(Miserere_-_Monastic_Prayer).wav
+Generated: 2026-04-17T10:53:27.143Z
+
+--- Track Information ---
+Title: Lord Have Mercy (Miserere - Monastic Prayer)
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: a cappella, gregorian chant, all-male choir, monophonic, serene, meditative, raw cathedral acoustics, adagio, solemn, rubato, no synth, no drums, no modern production
+
+--- Lyrics ---
+[Intro]
+[Solo Cantor, gentle and slow]
+Magister, miserere...
+Magister, miserere...
+
+[Verse 1]
+[Full Male Choir, Piano]
+Magister, miserere.
+Salvator, parce.
+Magister, miserere...
+
+[Verse 2]
+[Antiphonal, soft and low]
+Salvator, parce...
+Salvator, parce...
+Magister, miserere...
+
+[Verse 3]
+[Full Choir, Pianissimo, slow breath]
+Magister, miserere.
+Magister, miserere.
+Magister, miserere...
+
+[Outro]
+[Pianissimo, fading gently into reverb]
+(miserere... parce...)
+(miserere... parce...)
+
+Cover Art URL: https://cdn2.suno.ai/image_f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Lord Have Mercy (Miserere - Monastic Prayer)",
+  "play_count": 1,
+  "upvote_count": 1,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "a cappella, gregorian chant, all-male choir, monophonic, serene, meditative, raw cathedral acoustics, adagio, solemn, rubato, no synth, no drums, no modern production",
+    "prompt": "[Intro]\n[Solo Cantor, gentle and slow]\nMagister, miserere...\nMagister, miserere...\n\n[Verse 1]\n[Full Male Choir, Piano]\nMagister, miserere.\nSalvator, parce.\nMagister, miserere...\n\n[Verse 2]\n[Antiphonal, soft and low]\nSalvator, parce...\nSalvator, parce...\nMagister, miserere...\n\n[Verse 3]\n[Full Choir, Pianissimo, slow breath]\nMagister, miserere.\nMagister, miserere.\nMagister, miserere...\n\n[Outro]\n[Pianissimo, fading gently into reverb]\n(miserere... parce...)\n(miserere... parce...)",
+    "type": "gen",
+    "duration": 108.04,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": true,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-17T10:13:55.262Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 3,
+    "skip_count": 0,
+    "flagged": false,
+    "reaction_type": "L",
+    "clip": "f0ac6841-0b8d-4fc1-a7cf-ddab874e44d0",
+    "updated_at": "2026-04-17T10:41:58.261Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "4e6b89fc-75e9-445d-96a4-9da714a8eb35",
+    "name": "Grigorian_Chants_1",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "gregorian chant, a cappella, sacred choral",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "publish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  }
+}

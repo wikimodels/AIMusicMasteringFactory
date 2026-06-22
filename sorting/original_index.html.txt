@@ -1,0 +1,81 @@
+Created At: 2026-06-22T13:25:14Z
+Completed At: 2026-06-22T13:25:14Z
+File Path: `file:///d:/GitHub/AIMusicMasteringFactory/sorting/index.html`
+Total Lines: 2477
+Total Bytes: 91749
+Showing lines 1601 to 2400
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1601:           headers: { 'Content-Type': 'application/json' },
+1602:           body: JSON.stringify({ filename: card.dataset.filename, folder: card.dataset.folder })
+1603:         });
+1604:         const d = await r.json();
+1605:         if (d.success) {
+1606:           const audio = card.querySelector('audio');
+1607:           if (activeAudio === audio) stopActive();
+1608:           card.remove();
+1609:           successCount++;
+1610:         }
+1611:       } catch (e) {
+1612:         console.error('Failed to delete', card.dataset.filename, e);
+1613:       }
+1614:     });
+1615: 
+1616:     await Promise.all(promises);
+1617:     selectedCards.clear();
+1618:     updateBatchButton();
+1619:     syncCounts();
+1620:     btnDeleteSel.disabled = false;
+1621:     toast(`Deleted ${successCount} track(s)`);
+1622:   });
+1623: });
+1624: 
+1625: 
+1626: // ═══════════════════════════════════════════════════════
+1627: //  Build track card
+1628: // ═══════════════════════════════════════════════════════
+1629: function buildCard(trackData, folder, durOpt) {
+1630:   const filename = typeof trackData === 'string' ? trackData : trackData.name;
+1631:   const duration = typeof trackData === 'object' && trackData.duration ? trackData.duration : (durOpt || 0);
+1632:   const durStr   = duration ? fmt(duration) : '0:00';
+1633: 
+1634:   const card = doc
+<truncated 33673 bytes>
+;
+2364:     } catch (e) {
+2365:       toast('Ошибка выключения сервера', 'err');
+2366:     }
+2367:   }
+2368: });
+2369: 
+2370: // ═══════════════════════════════════════════════════════
+2371: // Search logic
+2372: // ═══════════════════════════════════════════════════════
+2373: const searchOverlay = document.getElementById('search-overlay');
+2374: const searchInput = document.getElementById('search-input');
+2375: const searchGrid = document.getElementById('search-overlay-grid');
+2376: const searchCount = document.getElementById('search-overlay-count');
+2377: const searchTagsTextarea = document.getElementById('search-tags-textarea');
+2378: const searchNamesTextarea = document.getElementById('search-names-textarea');
+2379: const searchCheckboxes = document.querySelectorAll('.search-cb');
+2380: 
+2381: document.getElementById('btn-search').addEventListener('click', () => {
+2382:   searchOverlay.classList.add('open');
+2383:   searchInput.focus();
+2384:   renderSearch();
+2385: });
+2386: 
+2387: document.getElementById('btn-close-search').addEventListener('click', () => {
+2388:   stopActive();
+2389:   searchOverlay.classList.remove('open');
+2390:   searchGrid.innerHTML = '';
+2391: });
+2392: 
+2393: searchInput.addEventListener('input', renderSearch);
+2394: searchCheckboxes.forEach(cb => cb.addEventListener('change', renderSearch));
+2395: 
+2396: function renderSearch() {
+2397:   const query = searchInput.value.toLowerCase().trim();
+2398:   const activeFolders = Array.from(searchCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+2399:   
+2400:   stopActive();
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

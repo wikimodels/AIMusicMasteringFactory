@@ -1,0 +1,225 @@
+Metadata for: Flowing_Time_(Aeternitatis_-_Organ_&_Voices)_2.wav
+Generated: 2026-04-17T10:53:25.660Z
+
+--- Track Information ---
+Title: Flowing Time (Aeternitatis - Organ & Voices) 2
+Artist: titaderty
+Year: 2026
+
+--- Musical Information ---
+
+--- Creation Details ---
+Prompt: sacred polyphony, gentle pipe organ, mixed choir, serene, adagio, layered voices, reverberation, solemn, no synth
+
+--- Lyrics ---
+[Intro: Sustained Organ Chord]
+[Solo Bass, very slow]
+Aeternitatis porta patet...
+
+[Verse 1: Layered Entrance]
+[Tenors enter]
+Tempus fluit ut flumen...
+[Baritones overlapping]
+In mare spatii infiniti...
+
+[Pipe Organ Interlude]
+[Reverent and calm]
+
+[Verse 2]
+[Full Choir softly harmonizing]
+Sine initio, sine fine,
+omnia in unum fluunt...
+
+[Outro]
+[Organ chord fading]
+(in unum fluunt...)
+
+Cover Art URL: https://cdn2.suno.ai/image_898c5b3c-6b49-4037-bbe9-22f26a492acb.jpeg
+
+--- Raw API Response ---
+{
+  "status": "complete",
+  "title": "Flowing Time (Aeternitatis - Organ & Voices)",
+  "play_count": 1,
+  "upvote_count": 0,
+  "allow_comments": true,
+  "is_verified": false,
+  "id": "898c5b3c-6b49-4037-bbe9-22f26a492acb",
+  "entity_type": "song_schema",
+  "video_url": "",
+  "audio_url": "https://cdn1.suno.ai/898c5b3c-6b49-4037-bbe9-22f26a492acb.mp3",
+  "media_urls": [
+    {
+      "url": "https://d2lwuy8qc234o3.cloudfront.net/1/clip/898c5b3c-6b49-4037-bbe9-22f26a492acb.m4a",
+      "content_type": "m4a-opus",
+      "delivery": "progressive",
+      "encoding": "1.0.0"
+    },
+    {
+      "url": "https://cdn1.suno.ai/898c5b3c-6b49-4037-bbe9-22f26a492acb.mp3",
+      "content_type": "mp3",
+      "delivery": "progressive"
+    }
+  ],
+  "image_url": "https://cdn2.suno.ai/image_898c5b3c-6b49-4037-bbe9-22f26a492acb.jpeg",
+  "image_large_url": "https://cdn2.suno.ai/image_large_898c5b3c-6b49-4037-bbe9-22f26a492acb.jpeg",
+  "major_model_version": "v5.5",
+  "model_name": "chirp-fenix",
+  "metadata": {
+    "tags": "sacred polyphony, gentle pipe organ, mixed choir, serene, adagio, layered voices, reverberation, solemn, no synth",
+    "prompt": "[Intro: Sustained Organ Chord]\n[Solo Bass, very slow]\nAeternitatis porta patet...\n\n[Verse 1: Layered Entrance]\n[Tenors enter]\nTempus fluit ut flumen...\n[Baritones overlapping]\nIn mare spatii infiniti...\n\n[Pipe Organ Interlude]\n[Reverent and calm]\n\n[Verse 2]\n[Full Choir softly harmonizing]\nSine initio, sine fine,\nomnia in unum fluunt...\n\n[Outro]\n[Organ chord fading]\n(in unum fluunt...)",
+    "type": "gen",
+    "duration": 69.4,
+    "refund_credits": false,
+    "stream": true,
+    "make_instrumental": false,
+    "can_remix": true,
+    "is_remix": false,
+    "priority": 10,
+    "has_stem": false,
+    "uses_latest_model": true,
+    "model_badges": {
+      "songcard": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "0000004D",
+          "border_color": "00000000"
+        }
+      },
+      "songrow": {
+        "display_name": "v5.5",
+        "light": {
+          "text_color": "FD429C",
+          "background_color": "FD429C1A",
+          "border_color": "00000000"
+        },
+        "dark": {
+          "text_color": "FD429C",
+          "background_color": "FD429C40",
+          "border_color": "00000000"
+        }
+      }
+    },
+    "is_mumble": false
+  },
+  "is_liked": false,
+  "user_id": "3528aea9-0737-4d5b-a35d-e9069bdbd421",
+  "display_name": "titaderty",
+  "handle": "titaderty",
+  "is_handle_updated": false,
+  "avatar_image_url": "https://cdn1.suno.ai/sAura22.jpg",
+  "is_trashed": false,
+  "is_hidden": false,
+  "created_at": "2026-04-17T10:30:56.928Z",
+  "is_public": false,
+  "reaction": {
+    "play_count": 1,
+    "skip_count": 0,
+    "flagged": false,
+    "clip": "898c5b3c-6b49-4037-bbe9-22f26a492acb",
+    "updated_at": "2026-04-17T10:32:12.932Z"
+  },
+  "is_following_creator": false,
+  "project": {
+    "id": "4e6b89fc-75e9-445d-96a4-9da714a8eb35",
+    "name": "Grigorian_Chants_1",
+    "description": "",
+    "is_trashed": false,
+    "is_public": false
+  },
+  "ownership": {
+    "ownership_reason": "subscribed"
+  },
+  "explicit": false,
+  "comment_count": 0,
+  "flag_count": 0,
+  "display_tags": "sacred choral, Renaissance polyphony, devotional (adagio)",
+  "is_contest_clip": false,
+  "has_hook": false,
+  "batch_index": 0,
+  "action_config": {
+    "actions": [
+      {
+        "action_type": "add_to_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "like_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "share_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "dislike_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "report_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remove_from_playlist",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "delete_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "edit_song_details",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "create_hook",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "download_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "publish_song",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remaster",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_extend",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_cover",
+        "disabled": false,
+        "visible": true
+      },
+      {
+        "action_type": "remix_reuse_style",
+        "disabled": false,
+        "visible": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,2839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Sorting Studio</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%2314141a' /><rect x='18' y='40' width='12' height='40' rx='6' fill='%232dd4ff' /><rect x='36' y='20' width='12' height='60' rx='6' fill='%23ffb347' /><rect x='54' y='50' width='12' height='30' rx='6' fill='%2334d399' /><rect x='72' y='30' width='12' height='50' rx='6' fill='%23ff4d6d' /></svg>">
+  <meta name="description" content="Professional music track sorting tool with drag-and-drop and inline playback.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style>
+    /* ── Design tokens ─────────────────────────────── */
+    :root {
+      --bg-root:    #08080b;
+      --bg-base:    #0f0f13;
+      --bg-panel:   #14141a;
+      --bg-card:    #1c1c24;
+      --bg-card-hv: #22222d;
+
+      --border:     #26263a;
+      --border-md:  #32324a;
+      --border-hi:  #42425a;
+
+      --txt-hi:     #eeeef8;
+      --txt-mid:    #8a8aaa;
+      --txt-lo:     #484868;
+
+      /* Column accent colours */
+      --c-origin:   #2dd4ff;
+      --c-redo:     #ffb347;
+      --c-liked:    #34d399;
+      --c-disliked:   #ff4d6d;
+
+      --c-origin-bg:  rgba(45,212,255,.06);
+      --c-redo-bg:    rgba(255,179,71,.06);
+      --c-liked-bg:   rgba(52,211,153,.06);
+      --c-disliked-bg:  rgba(255,77,109,.06);
+
+      --c-origin-bd:  rgba(45,212,255,.25);
+      --c-redo-bd:    rgba(255,179,71,.25);
+      --c-liked-bd:   rgba(52,211,153,.25);
+      --c-disliked-bd:  rgba(255,77,109,.25);
+
+      --c-cuts:     #a78bfa;
+      --c-cuts-bg:  rgba(167,139,250,.06);
+      --c-cuts-bd:  rgba(167,139,250,.25);
+
+      --accent: #2dd4ff;
+      --success: #34d399;
+      --r:  8px;
+      --rl: 14px;
+      --t:  0.18s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-root);
+      color: var(--txt-hi);
+      overflow: hidden;
+    }
+
+    /* ── Header ────────────────────────────────────── */
+    .header {
+      height: 64px;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      padding: 0 20px;
+      gap: 10px;
+      position: relative;
+      z-index: 50;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(45,212,255,.04) 0%, transparent 40%);
+      pointer-events: none;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #2dd4ff 0%, #8b5cf6 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #fff 30%, #8888cc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-sub {
+      font-size: 8.5px;
+      color: var(--txt-lo);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: .5px;
+    }
+
+    .header-stats {
+      margin-left: 20px;
+      margin-right: auto;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      color: var(--txt-mid);
+      transition: border-color var(--t);
+    }
+
+    .stat-chip:hover { border-color: var(--border-md); }
+
+    .stat-pip {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .stat-pip.origin { background: var(--c-origin); box-shadow: 0 0 6px var(--c-origin); }
+    .stat-pip.redo   { background: var(--c-redo);   box-shadow: 0 0 6px var(--c-redo);   }
+    .stat-pip.liked  { background: var(--c-liked); box-shadow: 0 0 6px var(--c-liked); }
+    .stat-pip.disliked { background: var(--c-disliked); box-shadow: 0 0 6px var(--c-disliked); }
+    .stat-pip.cuts   { background: var(--c-cuts); box-shadow: 0 0 6px var(--c-cuts); }
+
+    .stat-num {
+      font-weight: 600;
+      color: var(--txt-hi);
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 14px;
+      text-align: right;
+    }
+
+    .btn-refresh {
+      margin-left: 8px;
+      width: 36px; height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r);
+      color: var(--txt-hi);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--t);
+    }
+    .btn-refresh:hover { background: var(--bg-card-hv); color: #fff; border-color: var(--border-hi); }
+    .btn-refresh.spinning svg { animation: spin 0.7s linear infinite; }
+
+    /* ── View-list buttons ──────────────────────────── */
+    .btn-view-list {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r);
+      color: var(--txt-mid);
+      padding: 0 10px;
+      height: 32px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--t);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-view-list svg {
+      margin-top: 1px;
+      display: block;
+    }
+    .btn-view-list:hover { background: var(--bg-card-hv); color: var(--txt-hi); border-color: var(--border-hi); }
+    .btn-view-list.redo   { border-color: rgba(255,179,71,.3); color: var(--c-redo); }
+    .btn-view-list.redo:hover   { border-color: var(--c-redo); color: #fff; background: rgba(255,179,71,.15); }
+    .btn-view-list.liked { border-color: rgba(52,211,153,.3); color: var(--c-liked); }
+    .btn-view-list.liked:hover { border-color: var(--c-liked); color: #fff; background: rgba(52,211,153,.15); }
+    .btn-view-list.disliked { border-color: rgba(255,77,109,.3); color: var(--c-disliked); }
+    .btn-view-list.disliked:hover { border-color: var(--c-disliked); color: #fff; background: rgba(255,77,109,.15); }
+    .btn-view-list.cuts { border-color: rgba(167,139,250,.3); color: var(--c-cuts); }
+    .btn-view-list.cuts:hover { border-color: var(--c-cuts); color: #fff; background: rgba(167,139,250,.15); }
+
+    .list-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-root);
+      z-index: 400;
+      display: none;
+      flex-direction: column;
+    }
+    .list-overlay.open { display: flex; }
+
+    .list-overlay-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: var(--bg-base);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .list-overlay-icon { font-size: 18px; }
+
+    .list-overlay-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .list-overlay-title.redo   { color: var(--c-redo); }
+    .list-overlay-title.liked  { color: var(--c-liked); }
+    .list-overlay-title.disliked { color: var(--c-disliked); }
+    .list-overlay-title.cuts { color: var(--c-cuts); }
+
+    .list-overlay-count {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: 20px;
+      padding: 2px 10px;
+      color: var(--txt-mid);
+    }
+
+    .btn-close-overlay {
+      margin-left: auto;
+      margin-top: 4px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      color: var(--txt-mid);
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--t);
+      flex-shrink: 0;
+    }
+    .btn-close-overlay:hover {
+      background: rgba(255,77,109,.15);
+      border-color: var(--c-disliked);
+      color: var(--c-disliked);
+      transform: scale(1.1);
+    }
+
+    /* Two-column body */
+    .list-overlay-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .list-overlay-grid {
+      flex: 0 0 40%;
+      overflow-y: auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .list-overlay-grid::-webkit-scrollbar { width: 4px; }
+    .list-overlay-grid::-webkit-scrollbar-track { background: transparent; }
+    .list-overlay-grid::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+    .list-overlay-empty {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--txt-lo);
+      font-size: 13px;
+    }
+
+    /* Cards inside overlay: fill the column width, no grab cursor */
+    .list-overlay-grid .track-card {
+      cursor: default;
+      width: 100%;
+    }
+    .list-overlay-grid .track-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+      -webkit-line-clamp: unset;
+      -webkit-box-orient: unset;
+    }
+    .list-overlay-grid .card-checkbox {
+      display: none;
+    }
+
+
+    /* Tags / Names panels */
+    .list-overlay-tags {
+      flex: 0 0 20%;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 20px;
+      gap: 8px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+    #list-overlay-names, #search-overlay-names {
+      flex: 0 0 40%;
+    }
+    .list-overlay-tags::-webkit-scrollbar { width: 3px; }
+    .list-overlay-tags::-webkit-scrollbar-track { background: transparent; }
+    .list-overlay-tags::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+    .tags-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--txt-lo);
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tags-textarea {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r);
+      padding: 10px 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--txt-hi);
+      line-height: 1.9;
+      resize: none;
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--t), box-shadow var(--t);
+      caret-color: transparent;
+      user-select: none;
+      overflow-y: auto;
+    }
+    .tags-textarea:hover {
+      border-color: var(--border-hi);
+    }
+    .tags-textarea.copied {
+      border-color: var(--success);
+      box-shadow: 0 0 12px rgba(52,211,153,.2);
+    }
+    .tags-copy-hint {
+      font-size: 9.5px;
+      color: var(--txt-lo);
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      transition: color var(--t);
+    }
+    .tags-copy-hint.copied { color: var(--success); }
+
+    /* ── Main grid ─────────────────────────────────── */
+    .main {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 12px;
+      height: calc(100vh - 56px);
+    }
+
+    /* ── Column ────────────────────────────────────── */
+    .column {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--rl);
+      overflow: hidden;
+      transition: border-color var(--t);
+    }
+
+    .column.drag-target { border-color: var(--border-hi); }
+
+    .col-head {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* Top accent bar */
+    .col-head::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: var(--rl) var(--rl) 0 0;
+    }
+    .column.origin .col-head::before { background: var(--c-origin); }
+    .column.redo   .col-head::before { background: var(--c-redo);   }
+    .column.liked  .col-head::before { background: var(--c-liked); }
+    .column.disliked .col-head::before { background: var(--c-disliked); }
+
+    .col-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .col-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+.column.origin .col-title { color: var(--c-origin); }
+    .column.origin .col-icon { color: var(--c-origin); }
+    .column.redo   .col-title { color: var(--c-redo);   }
+    .column.redo   .col-icon { color: var(--c-redo);   }
+    .column.liked  .col-title { color: var(--c-liked); }
+    .column.liked  .col-icon { color: var(--c-liked); }
+    .column.disliked .col-title { color: var(--c-disliked); }
+    .column.disliked .col-icon { color: var(--c-disliked); }
+
+    .col-badge {
+      margin-left: auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: 20px;
+      padding: 1px 9px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--txt-mid);
+      min-width: 28px;
+      text-align: center;
+    }
+
+    /* ── Track list ────────────────────────────────── */
+    .track-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 80px;
+    }
+
+    .track-list::-webkit-scrollbar { width: 3px; }
+    .track-list::-webkit-scrollbar-track { background: transparent; }
+    .track-list::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+    /* ── Track card ────────────────────────────────── */
+    .track-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 10px 10px 8px;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: border-color var(--t), background var(--t), transform var(--t), box-shadow var(--t);
+      position: relative;
+    }
+
+    .track-card:active {
+      cursor: grabbing;
+    }
+
+    .track-card:hover {
+      background: var(--bg-card-hv);
+      transform: translateY(-1px);
+    }
+    .column.origin .track-card:hover { border-color: var(--c-origin-bd); box-shadow: 0 4px 18px var(--c-origin-bg); }
+    .column.redo   .track-card:hover { border-color: var(--c-redo-bd);   box-shadow: 0 4px 18px var(--c-redo-bg);   }
+    .column.liked  .track-card:hover { border-color: var(--c-liked-bd); box-shadow: 0 4px 18px var(--c-liked-bg); }
+    .column.disliked .track-card:hover { border-color: var(--c-disliked-bd); box-shadow: 0 4px 18px var(--c-disliked-bg); }
+
+    .track-card.is-playing {
+      border-color: var(--c-origin) !important;
+      box-shadow: 0 0 0 1px rgba(45,212,255,.15), 0 4px 24px rgba(45,212,255,.12) !important;
+    }
+
+    /* Drag states */
+    .sortable-ghost   { opacity: 0.25; }
+    .sortable-chosen  { cursor: grabbing !important; }
+    .sortable-drag    { opacity: 0.95; transform: rotate(1.5deg) scale(1.03) !important; box-shadow: 0 24px 64px rgba(0,0,0,.7) !important; }
+
+    /* ── Card top row ──────────────────────────────── */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      margin-bottom: 9px;
+    }
+
+    /* Drag handle hidden — whole card is draggable */
+    .drag-handle { display: none; }
+
+    /* Interactive elements inside card — normal cursors */
+    .track-card button,
+    .track-card input[type=range],
+    .track-card input[type=checkbox],
+    .track-card .vol-icon,
+    .track-card .progress-wrap,
+    .track-card .track-name { cursor: default; }
+    .track-card .track-name { cursor: text; }
+    .track-card button { cursor: pointer; }
+
+    .track-name {
+      flex: 1;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--txt-hi);
+      line-height: 1.45;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      word-break: break-word;
+      cursor: text;
+      border-radius: 4px;
+      transition: background var(--t), color var(--t);
+    }
+    .track-name:hover {
+      color: var(--accent);
+    }
+
+    /* Inline rename input */
+    .track-name-input {
+      flex: 1;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      color: var(--txt-hi);
+      background: var(--bg-base);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 1px 5px;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(45,212,255,.18);
+      min-width: 0;
+      width: 100%;
+      transition: box-shadow var(--t);
+    }
+    .track-name-input:focus {
+      box-shadow: 0 0 0 3px rgba(45,212,255,.28);
+    }
+
+    /* ── Card Checkbox ─────────────────────────────── */
+    .card-checkbox {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border: 2px solid var(--border-md);
+      border-radius: 4px;
+      background: var(--bg-root);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all var(--t);
+    }
+    .card-checkbox:checked {
+      background: var(--c-disliked);
+      border-color: var(--c-disliked);
+    }
+    .card-checkbox:checked::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 5px;
+      width: 4px; height: 8px;
+      border: solid var(--bg-base);
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+    .card-checkbox:indeterminate {
+      background: var(--c-disliked);
+      border-color: var(--c-disliked);
+    }
+    .card-checkbox:indeterminate::after {
+      content: '';
+      position: absolute;
+      top: 6px; left: 3px;
+      width: 8px; height: 2px;
+      background: var(--bg-base);
+      border-radius: 1px;
+    }
+    .card-checkbox:hover { border-color: var(--c-disliked); }
+
+    /* ── Player row ────────────────────────────────── */
+    .card-player {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 7px;
+    }
+
+    .btn-play {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 1px solid var(--border-md);
+      background: var(--bg-base);
+      color: var(--txt-mid);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 9px;
+      flex-shrink: 0;
+      transition: all var(--t);
+      position: relative;
+    }
+    .btn-play:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(45,212,255,.25);
+    }
+    .btn-play.is-playing {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #000;
+      box-shadow: 0 0 14px rgba(45,212,255,.4);
+    }
+
+    /* Equaliser animation when playing */
+    .eq-bars {
+      display: none;
+      gap: 2px;
+      align-items: flex-end;
+      height: 10px;
+    }
+    .btn-play.is-playing .play-icon { display: none; }
+    .btn-play.is-playing .eq-bars { display: flex; }
+
+    .eq-bar {
+      width: 3px;
+      background: #000;
+      border-radius: 1px;
+      animation: eq 0.7s ease-in-out infinite alternate;
+    }
+    .eq-bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+    .eq-bar:nth-child(2) { height: 10px; animation-delay: .15s; }
+    .eq-bar:nth-child(3) { height: 4px; animation-delay: .3s; }
+
+    @keyframes eq {
+      from { transform: scaleY(0.4); }
+      to   { transform: scaleY(1); }
+    }
+
+    .progress-wrap {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+    .progress-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #8b5cf6);
+      border-radius: 2px;
+      width: 0%;
+      transition: width .1s linear;
+    }
+    .progress-dot {
+      position: absolute;
+      right: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity var(--t);
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .progress-wrap:hover .progress-dot { opacity: 1; }
+
+    .track-time {
+      font-size: 9.5px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--txt-mid);
+      white-space: nowrap;
+      min-width: 68px;
+      text-align: right;
+    }
+
+    /* ── Speed buttons ─────────────────────────────── */
+    .speed-row {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .spd-btn {
+      flex: none;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--txt-lo);
+      padding: 3px 6px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--t);
+    }
+    .spd-btn:hover { border-color: var(--border-md); color: var(--txt-mid); }
+    .spd-btn.active {
+      background: rgba(45,212,255,.08);
+      border-color: rgba(45,212,255,.35);
+      color: var(--accent);
+    }
+
+    /* ── Volume (inline with speed) ──────────────── */
+    .vol-sep {
+      width: 1px;
+      height: 12px;
+      background: var(--border-md);
+      flex-shrink: 0;
+      margin: 0 3px;
+    }
+    .vol-icon {
+      font-size: 11px;
+      color: var(--txt-lo);
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: color var(--t);
+      line-height: 1;
+    }
+    .vol-icon:hover { color: var(--txt-mid); }
+    .vol-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border-md);
+      outline: none;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .vol-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px rgba(45,212,255,.4);
+      transition: transform var(--t);
+    }
+    .vol-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+    .vol-slider::-moz-range-thumb {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+    }
+
+    /* ── Volume row ──────────────────────────────── */
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+    .vol-icon {
+      font-size: 11px;
+      color: var(--txt-lo);
+      width: 14px;
+      text-align: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: color var(--t);
+    }
+    .vol-icon:hover { color: var(--txt-mid); }
+    .vol-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border-md);
+      outline: none;
+      cursor: pointer;
+    }
+    .vol-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px rgba(45,212,255,.4);
+      transition: transform var(--t);
+    }
+    .vol-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+    .vol-slider::-moz-range-thumb {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+    }
+
+
+
+
+    /* ── Toast ─────────────────────────────────────── */
+    #toast-wrap {
+      position: fixed;
+      bottom: 18px; right: 18px;
+      z-index: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r);
+      padding: 9px 14px;
+      font-size: 11.5px;
+      color: var(--txt-hi);
+      animation: slideIn .25s ease;
+      max-width: 280px;
+      backdrop-filter: blur(8px);
+    }
+    .toast.ok  { border-left: 3px solid var(--success); }
+    .toast.err { border-left: 3px solid var(--c-disliked); }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(16px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Confirm modal ─────────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.75);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+    .overlay.open { display: flex; }
+
+    .dialog {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-md);
+      border-top: 2px solid var(--c-disliked);
+      border-radius: var(--rl);
+      padding: 22px;
+      max-width: 380px;
+      width: 90%;
+      animation: popIn .2s ease;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(.94); }
+      to   { opacity: 1; transform: scale(1);   }
+    }
+
+    .dialog-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--c-disliked);
+      margin-bottom: 10px;
+    }
+
+    .dialog-body {
+      font-size: 12px;
+      color: var(--txt-mid);
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    .dialog-fname {
+      display: block;
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--txt-hi);
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: 5px;
+      padding: 6px 9px;
+      word-break: break-all;
+    }
+
+    .dialog-btns {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn-cancel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r);
+      color: var(--txt-mid);
+      padding: 7px 16px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all var(--t);
+    }
+    .btn-cancel:hover { background: var(--bg-card-hv); color: var(--txt-hi); }
+
+    .btn-del-forever {
+      background: rgba(255,77,109,.1);
+      border: 1px solid var(--c-disliked);
+      border-radius: var(--r);
+      color: var(--c-disliked);
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--t);
+    }
+    .btn-del-forever:hover { background: rgba(255,77,109,.25); }
+
+    /* ── Loading ───────────────────────────────────── */
+    .loading-state {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 28px 0;
+      color: var(--txt-lo); font-size: 11px;
+    }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border-md);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Upload button ─────────────────────────────── */
+    .btn-upload {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 10px;
+      background: linear-gradient(135deg, rgba(45,212,255,.15) 0%, rgba(139,92,246,.15) 100%);
+      border: 1px solid rgba(45,212,255,.4);
+      border-radius: var(--r);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: all var(--t);
+      white-space: nowrap;
+    }
+    .btn-upload:hover {
+      background: linear-gradient(135deg, rgba(45,212,255,.25) 0%, rgba(139,92,246,.25) 100%);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px rgba(45,212,255,.2);
+    }
+    .btn-upload svg { flex-shrink: 0; }
+
+    /* ── Upload overlay ────────────────────────────── */
+    .upload-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,8,11,.92);
+      z-index: 600;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0;
+      backdrop-filter: blur(8px);
+    }
+    .upload-overlay.open { display: flex; }
+
+    .upload-panel {
+      width: 100%;
+      max-width: 680px;
+      margin: 60px auto auto auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 100vh;
+    }
+
+    .upload-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .upload-head-title {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff 30%, #8888cc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .upload-head-sub {
+      font-size: 11px;
+      color: var(--txt-lo);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-close-upload {
+      margin-left: auto;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      color: var(--txt-mid);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--t);
+      flex-shrink: 0;
+    }
+    .btn-close-upload:hover {
+      background: rgba(255,77,109,.15);
+      border-color: var(--c-disliked);
+      color: var(--c-disliked);
+      transform: scale(1.1);
+    }
+
+    /* Drop zone */
+        .drop-zone {
+      border: 2px dashed var(--border-md);
+      border-radius: var(--rl);
+      background: var(--bg-panel);
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas:
+        "icon title btn"
+        "icon sub   btn";
+      align-items: center;
+      gap: 4px 16px;
+      cursor: pointer;
+      transition: all .2s ease;
+      position: relative;
+      text-align: left;
+    }
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(45,212,255,.05);
+      box-shadow: 0 0 40px rgba(45,212,255,.08) inset;
+    }
+        .drop-zone-icon {
+      grid-area: icon;
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, rgba(45,212,255,.12), rgba(139,92,246,.12));
+      border: 1px solid rgba(45,212,255,.2);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all .2s ease;
+    }
+    .drop-zone.drag-over .drop-zone-icon {
+      background: linear-gradient(135deg, rgba(45,212,255,.25), rgba(139,92,246,.25));
+      border-color: var(--accent);
+      transform: scale(1.08);
+    }
+        .drop-zone-title {
+      grid-area: title;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--txt-hi);
+      align-self: end;
+    }
+        .drop-zone-sub {
+      grid-area: sub;
+      font-size: 11px;
+      color: var(--txt-lo);
+      font-family: 'JetBrains Mono', monospace;
+      align-self: start;
+    }
+        .drop-zone-btn {
+      grid-area: btn;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: rgba(45,212,255,.1);
+      border: 1px solid rgba(45,212,255,.3);
+      border-radius: 8px;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all var(--t);
+    }
+    .drop-zone-btn:hover {
+      background: rgba(45,212,255,.2);
+      border-color: var(--accent);
+    }
+    #upload-file-input { display: none; }
+
+    /* File list */
+    .upload-file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+    .upload-file-list::-webkit-scrollbar { width: 3px; }
+    .upload-file-list::-webkit-scrollbar-track { background: transparent; }
+    .upload-file-list::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 2px; }
+
+    .upload-file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 9px 12px;
+      transition: border-color var(--t);
+    }
+    .upload-file-item.success { border-color: rgba(52,211,153,.35); }
+    .upload-file-item.error   { border-color: rgba(255,77,109,.35); }
+
+    .ufi-icon {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(45,212,255,.08);
+    }
+    .ufi-name {
+      flex: 1;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--txt-hi);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .ufi-size {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--txt-lo);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ufi-status {
+      flex-shrink: 0;
+      font-size: 11px;
+      width: 18px;
+      text-align: center;
+    }
+
+    /* Progress bar per file */
+    .ufi-progress-wrap {
+      position: relative;
+      flex-shrink: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--border-md);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .ufi-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), #8b5cf6);
+      width: 0%;
+      transition: width .15s linear;
+    }
+
+    /* Upload action row */
+    .upload-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-start-upload {
+      flex: 1;
+      height: 38px;
+      background: linear-gradient(135deg, rgba(45,212,255,.18) 0%, rgba(139,92,246,.18) 100%);
+      border: 1px solid rgba(45,212,255,.45);
+      border-radius: var(--r);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all var(--t);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-start-upload:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(45,212,255,.28) 0%, rgba(139,92,246,.28) 100%);
+      box-shadow: 0 0 20px rgba(45,212,255,.15);
+    }
+    .btn-start-upload:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .btn-clear-list {
+      height: 38px;
+      padding: 0 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: var(--r);
+      color: var(--txt-mid);
+      font-size: 12px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all var(--t);
+    }
+    .btn-clear-list:hover { background: var(--bg-card-hv); color: var(--txt-hi); }
+
+    .upload-summary {
+      font-size: 11px;
+      color: var(--txt-lo);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .upload-summary.done { color: var(--success); }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🎛</div>
+    <div>
+      <div class="logo-text">Music Sorting Studio</div>
+      <div class="logo-sub">Drag · Play · Sort</div>
+    </div>
+  </div>
+
+  <div class="header-stats">
+    <div class="stat-chip">
+      <span class="stat-pip origin"></span>
+      <span>Origin</span>
+      <span class="stat-num" id="cnt-origin">0</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-pip redo"></span>
+      <span>Redo</span>
+      <span class="stat-num" id="cnt-redo">0</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-pip disliked"></span>
+      <span>Disliked</span>
+      <span class="stat-num" id="cnt-disliked">0</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-pip liked"></span>
+      <span>Liked</span>
+      <span class="stat-num" id="cnt-liked">0</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-pip cuts"></span>
+      <span>Cuts</span>
+      <span class="stat-num" id="cnt-cuts">0</span>
+    </div>
+    <label style="display:flex; align-items:center; gap:4px; margin-left:11px; cursor:pointer; font-size:10px; color:var(--txt-mid); white-space:nowrap;">
+      <input type="checkbox" id="cb-select-all" class="card-checkbox" title="Select / Deselect All">
+      Select All
+    </label>
+    <button class="btn-view-list disliked" id="btn-delete-selected" title="Delete all checked tracks" style="display:none; margin-left:11px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Delete (<span id="sel-count">0</span>)
+    </button>
+    <button class="btn-upload" id="btn-open-upload" title="Upload audio files to Origin">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload
+    </button>
+    <button class="btn-view-list redo"   id="btn-show-redo"   title="Full list of Redo tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg> Redo</button>
+    <button class="btn-view-list disliked" id="btn-show-disliked" title="Full list of Disliked tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> Disliked</button>
+    <button class="btn-view-list liked"  id="btn-show-liked"  title="Full list of Liked tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg> Liked</button>
+    <button class="btn-view-list cuts"  id="btn-show-cuts"  title="Full list of Cut tracks"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 9 19 4.5M9.5 9 5 4.5M14.5 15 19 19.5M9.5 15 5 19.5M5 9l14 10M19 9 5 19"/></svg> Cuts</button>
+    <button class="btn-view-list" id="btn-search" title="Search tracks" style="color:var(--txt-hi); border-color:var(--border-hi);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      Search
+    </button>
+  </div>
+  
+  <button class="btn-refresh" id="btn-power-off" title="Shutdown Server" style="color: var(--c-disliked); border-color: rgba(255,77,109,.3); margin-left: 6px; margin-right: 20px;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line>
+    </svg>
+  </button>
+</header>
+
+
+<!-- ══════════════ COLUMNS ══════════════ -->
+<main class="main">
+
+  <div class="column redo" id="col-redo">
+    <div class="col-head">
+      <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg></span>
+      <span class="col-title">Redo</span>
+      <span class="col-badge" id="badge-redo">0</span>
+    </div>
+    <div class="track-list" id="list-redo">
+      <div class="loading-state"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+
+  <div class="column disliked" id="col-disliked">
+    <div class="col-head">
+      <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></span>
+      <span class="col-title">Disliked</span>
+      <span class="col-badge" id="badge-disliked">0</span>
+    </div>
+    <div class="track-list" id="list-disliked">
+      <div class="loading-state"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+
+  <div class="column liked" id="col-liked">
+    <div class="col-head">
+      <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></span>
+      <span class="col-title">Liked</span>
+      <span class="col-badge" id="badge-liked">0</span>
+    </div>
+    <div class="track-list" id="list-liked">
+      <div class="loading-state"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+
+  <div class="column origin" id="col-origin">
+    <div class="col-head">
+      <span class="col-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>
+      <span class="col-title">Origin</span>
+      <span class="col-badge" id="badge-origin">0</span>
+    </div>
+    <div class="track-list" id="list-origin">
+      <div class="loading-state"><div class="spinner"></div> Loading…</div>
+    </div>
+  </div>
+
+  <div id="list-cuts" style="display:none;"></div>
+  <span id="badge-cuts" style="display:none;">0</span>
+
+</main>
+
+<!-- ══════════════ TOASTS ══════════════ -->
+<div id="toast-wrap"></div>
+
+<!-- ══════════════ CONFIRM MODAL ══════════════ -->
+<div class="overlay" id="confirm-overlay">
+  <div class="dialog">
+    <div class="dialog-title">⚠️ Permanent Delete</div>
+    <div class="dialog-body">
+      The file will be <strong>permanently deleted from disk</strong>. This cannot be undone.
+      <span class="dialog-fname" id="confirm-fname"></span>
+    </div>
+    <div class="dialog-btns">
+      <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+      <button class="btn-del-forever" id="confirm-ok">Delete Forever</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TRIM OVERLAY ══════════════ -->
+<div class="overlay" id="trim-overlay">
+  <div class="dialog" style="max-width: 560px;">
+    <div class="dialog-title" style="color: var(--c-cuts);">✂ Trim Track</div>
+    <div class="dialog-body">
+      <div id="trim-track-name" class="dialog-fname" style="margin-bottom: 18px; font-size: 12px;"></div>
+
+      <!-- Waveform / progress bar -->
+      <div class="card-player" style="background: var(--bg-base); padding: 10px 12px; border-radius: var(--r); border: 1px solid var(--border-md); margin-bottom: 16px;">
+        <button class="btn-play" id="trim-play-btn" title="Play Preview">
+          <span class="play-icon">▶</span>
+          <span class="eq-bars">
+            <span class="eq-bar"></span><span class="eq-bar"></span><span class="eq-bar"></span>
+          </span>
+        </button>
+        <div class="progress-wrap" id="trim-prog-wrap">
+          <div class="progress-fill" id="trim-prog-fill"></div>
+          <div class="progress-dot" id="trim-prog-dot"></div>
+        </div>
+        <span class="track-time" id="trim-time">0:00 / 0:00</span>
+        <audio id="trim-audio" preload="none"></audio>
+      </div>
+
+      <!-- Dual-handle range slider -->
+      <div style="margin-bottom: 20px;">
+        <!-- Labels row -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-size:11px; color:var(--txt-mid); font-family:monospace;">
+            ▶ <span id="trim-start-label" style="color:var(--c-cuts); font-weight:600;">0:00</span>
+          </span>
+          <span style="font-size:11px; color:var(--txt-mid); font-family:monospace;">
+            Clip: <span id="trim-duration" style="color:var(--c-cuts); font-weight:600;">0:00</span>
+          </span>
+          <span style="font-size:11px; color:var(--txt-mid); font-family:monospace;">
+            ■ <span id="trim-end-label" style="color:var(--txt-hi); font-weight:600;">0:00</span>
+          </span>
+        </div>
+        <!-- Dual handle track -->
+        <div id="trim-range-track" style="position:relative; height:6px; background:var(--bg-base); border-radius:3px; border:1px solid var(--border-md); margin:14px 0; cursor:pointer; user-select:none;">
+          <div id="trim-range-fill" style="position:absolute; top:0; bottom:0; background:var(--c-cuts); border-radius:3px; opacity:0.7;"></div>
+          <div id="trim-handle-start" style="position:absolute; top:50%; width:18px; height:18px; background:var(--c-cuts); border-radius:50%; transform:translate(-50%,-50%); cursor:grab; box-shadow:0 0 0 3px rgba(167,139,250,.3); transition:box-shadow .15s; z-index:2;"></div>
+          <div id="trim-handle-end" style="position:absolute; top:50%; width:18px; height:18px; background:var(--txt-hi); border-radius:50%; transform:translate(-50%,-50%); cursor:grab; box-shadow:0 0 0 3px rgba(255,255,255,.15); transition:box-shadow .15s; z-index:2;"></div>
+        </div>
+        <!-- Hidden inputs for compatibility -->
+        <input type="hidden" id="trim-start" value="0">
+        <input type="hidden" id="trim-end" value="300">
+      </div>
+    </div>
+    <div class="dialog-btns">
+      <button class="btn-cancel" id="trim-cancel">Cancel</button>
+      <button class="btn-del-forever" id="trim-save" style="background: rgba(167,139,250,.1); border-color: var(--c-cuts); color: var(--c-cuts);">Save to Cuts</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ UPLOAD OVERLAY ══════════════ -->
+<div class="upload-overlay" id="upload-overlay">
+  <div class="upload-panel">
+
+    <div class="upload-head">
+      <div>
+        <div class="upload-head-title">Upload Tracks</div>
+        <div class="upload-head-sub">mp3 · wav → origin/</div>
+      </div>
+      <button class="btn-close-upload" id="btn-close-upload" title="Close">✕</button>
+    </div>
+
+    <div class="drop-zone" id="drop-zone">
+      <div class="drop-zone-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2dd4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <div class="drop-zone-title">Drop files here</div>
+      <div class="drop-zone-sub">Supports .mp3 and .wav</div>
+      <button class="drop-zone-btn" id="btn-browse-files">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Browse files
+      </button>
+      <input type="file" id="upload-file-input" multiple accept=".mp3,.wav,audio/mpeg,audio/wav">
+    </div>
+
+    <div class="upload-file-list" id="upload-file-list"></div>
+
+    <div class="upload-actions" id="upload-actions" style="display:none;">
+      <button class="btn-clear-list" id="btn-clear-files">Clear</button>
+      <button class="btn-start-upload" id="btn-start-upload">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload <span id="upload-btn-count"></span>
+      </button>
+    </div>
+
+    <div class="upload-summary" id="upload-summary"></div>
+
+  </div>
+</div>
+
+<!-- ══════════════ LIST OVERLAY ══════════════ -->
+<div class="list-overlay" id="list-overlay">
+  <div class="list-overlay-head">
+    <span class="list-overlay-icon" id="list-overlay-icon"></span>
+    <span class="list-overlay-title" id="list-overlay-title"></span>
+    <span class="list-overlay-count" id="list-overlay-count">0 tracks</span>
+    <button class="btn-close-overlay" id="btn-close-overlay" title="Close — return to dashboard">✕</button>
+  </div>
+  <div class="list-overlay-body">
+    <div class="list-overlay-tags" id="list-overlay-tags">
+      <div class="tags-label">Tags (7 chars)</div>
+      <textarea class="tags-textarea" id="tags-textarea" readonly title="Click to copy all tags"></textarea>
+      <div class="tags-copy-hint" id="tags-copy-hint">click to copy</div>
+    </div>
+    <div class="list-overlay-tags" id="list-overlay-names">
+      <div class="tags-label">Names</div>
+      <textarea class="tags-textarea" id="names-textarea" readonly title="Click to copy all names"></textarea>
+      <div class="tags-copy-hint" id="names-copy-hint">click to copy</div>
+    </div>
+    <div class="list-overlay-grid" id="list-overlay-grid"></div>
+  </div>
+</div>
+
+<!-- ── SEARCH OVERLAY ── -->
+<div class="list-overlay" id="search-overlay">
+  <div class="list-overlay-head" style="justify-content: flex-start; gap: 16px;">
+    <span class="list-overlay-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </span>
+    <input type="text" id="search-input" placeholder="Search tracks..." style="flex: 1; max-width: 400px; background: var(--bg-card); border: 1px solid var(--border-md); color: var(--txt-hi); padding: 8px 12px; border-radius: var(--r); outline: none; font-size: 14px;">
+    
+    <div class="search-filters" style="display: flex; gap: 12px; align-items: center; margin-left: 10px;">
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; font-size:11px; color:var(--txt-mid);"><input type="checkbox" class="search-cb" value="origin" checked> Origin</label>
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; font-size:11px; color:var(--txt-mid);"><input type="checkbox" class="search-cb" value="redo" checked> Redo</label>
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; font-size:11px; color:var(--txt-mid);"><input type="checkbox" class="search-cb" value="liked" checked> Liked</label>
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; font-size:11px; color:var(--txt-mid);"><input type="checkbox" class="search-cb" value="disliked" checked> Disliked</label>
+      <label style="display:flex; align-items:center; gap:4px; cursor:pointer; font-size:11px; color:var(--txt-mid);"><input type="checkbox" class="search-cb" value="cuts" checked> Cuts</label>
+    </div>
+
+    <span class="list-overlay-count" id="search-overlay-count" style="margin-left: auto;">0 tracks</span>
+    <button class="btn-close-overlay" id="btn-close-search" title="Close">✕</button>
+  </div>
+  <div class="list-overlay-body">
+    <div class="list-overlay-tags" id="search-overlay-tags">
+      <div class="tags-label">Tags (7 chars)</div>
+      <textarea class="tags-textarea" id="search-tags-textarea" readonly title="Click to copy all tags"></textarea>
+      <div class="tags-copy-hint" id="search-tags-copy-hint">click to copy</div>
+    </div>
+    <div class="list-overlay-tags" id="search-overlay-names">
+      <div class="tags-label">Names</div>
+      <textarea class="tags-textarea" id="search-names-textarea" readonly title="Click to copy all names"></textarea>
+      <div class="tags-copy-hint" id="search-names-copy-hint">click to copy</div>
+    </div>
+    <div class="list-overlay-grid" id="search-overlay-grid"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════════════════
+let activeAudio    = null;   // currently playing HTMLAudioElement
+let activePlayBtn  = null;   // its play button
+let activeCard     = null;   // its card element
+let confirmCb      = null;   // pending confirm callback
+let globalTracksData = null; // latest tracks data from API
+
+// ═══════════════════════════════════════════════════════
+//  Helpers
+// ═══════════════════════════════════════════════════════
+function fmt(sec) {
+  if (!isFinite(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = String(Math.floor(sec % 60)).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function toast(msg, type = 'ok') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+function syncCounts() {
+  ['origin', 'redo', 'liked', 'disliked', 'cuts'].forEach(col => {
+    const list = document.getElementById(`list-${col}`);
+    if (!list) return;
+    const n = list.querySelectorAll('.track-card').length;
+    const badge = document.getElementById(`badge-${col}`);
+    if (badge) badge.textContent = n;
+    const cnt = document.getElementById(`cnt-${col}`);
+    if (cnt) cnt.textContent = n;
+  });
+}
+
+function syncEmpty(listEl) {
+  const hasCards = listEl.querySelector('.track-card');
+  listEl.dataset.empty = hasCards ? 'false' : 'true';
+}
+
+function stopActive() {
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio = null;
+  }
+  if (activePlayBtn) {
+    activePlayBtn.classList.remove('is-playing');
+    activeCard?.classList.remove('is-playing');
+    activePlayBtn = null;
+    activeCard    = null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  Confirm dialog
+// ═══════════════════════════════════════════════════════
+document.getElementById('confirm-cancel').onclick = () => {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  confirmCb = null;
+};
+document.getElementById('confirm-ok').onclick = () => {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  confirmCb?.();
+  confirmCb = null;
+};
+function showConfirm(fname, cb) {
+  document.getElementById('confirm-fname').textContent = fname;
+  document.getElementById('confirm-overlay').classList.add('open');
+  confirmCb = cb;
+}
+
+// ═══════════════════════════════════════════════════════
+//  Batch Selection
+// ═══════════════════════════════════════════════════════
+const selectedCards = new Set();
+const btnDeleteSel  = document.getElementById('btn-delete-selected');
+const selCountEl    = document.getElementById('sel-count');
+const cbSelectAll   = document.getElementById('cb-select-all');
+
+function updateBatchButton() {
+  const cnt = selectedCards.size;
+  const totalCards = document.querySelectorAll('.main .track-card').length;
+
+  if (cnt > 0) {
+    selCountEl.textContent = cnt;
+    btnDeleteSel.style.display = 'inline-flex';
+  } else {
+    btnDeleteSel.style.display = 'none';
+  }
+
+  if (cbSelectAll) {
+    if (cnt === 0) {
+      cbSelectAll.checked = false;
+      cbSelectAll.indeterminate = false;
+    } else if (cnt === totalCards && totalCards > 0) {
+      cbSelectAll.checked = true;
+      cbSelectAll.indeterminate = false;
+    } else {
+      cbSelectAll.checked = false;
+      cbSelectAll.indeterminate = true;
+    }
+  }
+}
+
+cbSelectAll.addEventListener('change', (e) => {
+  const isChecked = e.target.checked;
+  const cards = document.querySelectorAll('.main .track-card');
+  cards.forEach(card => {
+    const cb = card.querySelector('.card-checkbox');
+    if (cb) {
+      cb.checked = isChecked;
+      if (isChecked) selectedCards.add(card);
+      else selectedCards.delete(card);
+    }
+  });
+  updateBatchButton();
+});
+
+btnDeleteSel.addEventListener('click', () => {
+  if (selectedCards.size === 0) return;
+  const count = selectedCards.size;
+  showConfirm(`${count} track${count > 1 ? 's' : ''}`, async () => {
+    btnDeleteSel.disabled = true;
+    let successCount = 0;
+    
+    // Batch delete using Promise.all on individual endpoints
+    const promises = Array.from(selectedCards).map(async card => {
+      try {
+        const r = await fetch('/api/delete', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: card.dataset.filename, folder: card.dataset.folder })
+        });
+        const d = await r.json();
+        if (d.success) {
+          const audio = card.querySelector('audio');
+          if (activeAudio === audio) stopActive();
+          card.remove();
+          successCount++;
+        }
+      } catch (e) {
+        console.error('Failed to delete', card.dataset.filename, e);
+      }
+    });
+
+    await Promise.all(promises);
+    selectedCards.clear();
+    updateBatchButton();
+    syncCounts();
+    btnDeleteSel.disabled = false;
+    toast(`Deleted ${successCount} track(s)`);
+  });
+});
+
+
+// ═══════════════════════════════════════════════════════
+//  Build track card
+// ═══════════════════════════════════════════════════════
+function buildCard(trackData, folder, durOpt) {
+  const filename = typeof trackData === 'string' ? trackData : trackData.name;
+  const duration = typeof trackData === 'object' && trackData.duration ? trackData.duration : (durOpt || 0);
+  const durStr   = duration ? fmt(duration) : '0:00';
+
+  const card = document.createElement('div');
+  card.className = 'track-card';
+  card.dataset.filename = filename;
+  card.dataset.folder   = folder;
+  if (duration) card.dataset.duration = duration;
+
+  const label = filename.replace(/\.[^.]+$/, '');
+
+  card.innerHTML = `
+    <div class="card-top">
+      <span class="drag-handle" title="Drag to move">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
+          <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
+          <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
+        </svg>
+      </span>
+      <span class="track-name" title="Click to rename">${label}</span>
+      <input type="checkbox" class="card-checkbox" title="Select for deletion">
+    </div>
+    <div class="card-player">
+      <button class="btn-play" title="Play / Pause">
+        <span class="play-icon">▶</span>
+        <span class="eq-bars">
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+          <span class="eq-bar"></span>
+        </span>
+      </button>
+      <div class="progress-wrap">
+        <div class="progress-fill"></div>
+        <div class="progress-dot"></div>
+      </div>
+      <span class="track-time">0:00 / ${durStr}</span>
+    </div>
+    <div class="speed-row">
+      <button class="spd-btn active" data-spd="1">1×</button>
+      <button class="spd-btn" data-spd="1.25">1.25×</button>
+      <button class="spd-btn" data-spd="1.5">1.5×</button>
+      <button class="spd-btn" data-spd="1.75">1.75×</button>
+      <button class="spd-btn trim-btn" title="Trim Track" style="color:var(--c-cuts);">✂ Trim</button>
+      <span class="vol-sep"></span>
+      <span class="vol-icon" title="Mute / Unmute">🔈</span>
+      <input type="range" class="vol-slider" min="0" max="1" step="0.01" value="0.3">
+    </div>
+    <audio preload="none"></audio>
+  `;
+
+  const audio     = card.querySelector('audio');
+  audio.volume    = 0.3;
+  const btnPlay   = card.querySelector('.btn-play');
+  const progWrap  = card.querySelector('.progress-wrap');
+  const progFill  = card.querySelector('.progress-fill');
+  const progDot   = card.querySelector('.progress-dot');
+  const timeEl    = card.querySelector('.track-time');
+  const spdBtns   = card.querySelectorAll('.spd-btn');
+  const volSlider = card.querySelector('.vol-slider');
+  const volIcon   = card.querySelector('.vol-icon');
+
+  function getAudioSrc() {
+    return `/audio/${card.dataset.folder}/${encodeURIComponent(card.dataset.filename)}`;
+  }
+
+  // ── Play / Pause ──────────────────────────────────
+  btnPlay.addEventListener('click', async (e) => {
+    e.stopPropagation();
+
+    // Pause whoever is playing (unless it's this card)
+    if (activeAudio && activeAudio !== audio) stopActive();
+
+    if (audio.paused) {
+      // Set src only once — prevents restart on resume
+      if (!audio.dataset.loaded) {
+        audio.src = getAudioSrc();
+        audio.dataset.loaded = '1';
+      }
+      try {
+        await audio.play();
+        btnPlay.classList.add('is-playing');
+        card.classList.add('is-playing');
+        activeAudio   = audio;
+        activePlayBtn = btnPlay;
+        activeCard    = card;
+      } catch (err) {
+        toast('Playback error: ' + err.message, 'err');
+      }
+    } else {
+      // Pause — keep position, just stop
+      audio.pause();
+      btnPlay.classList.remove('is-playing');
+      card.classList.remove('is-playing');
+      activeAudio   = null;
+      activePlayBtn = null;
+      activeCard    = null;
+    }
+  });
+
+  // ── Audio events ──────────────────────────────────
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    progFill.style.width = pct + '%';
+    progDot.style.right  = (100 - pct) + '%';
+    timeEl.textContent   = `${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
+  });
+
+  audio.addEventListener('ended', () => {
+    btnPlay.classList.remove('is-playing');
+    card.classList.remove('is-playing');
+    progFill.style.width = '0%';
+    timeEl.textContent   = `0:00 / ${fmt(audio.duration)}`;
+    activeAudio   = null;
+    activePlayBtn = null;
+    activeCard    = null;
+  });
+
+  // ── Seek ──────────────────────────────────────────
+  progWrap.addEventListener('click', (e) => {
+    if (!audio.duration) return;
+    const r   = progWrap.getBoundingClientRect();
+    const pct = (e.clientX - r.left) / r.width;
+    audio.currentTime = pct * audio.duration;
+  });
+
+  // ── Speed ─────────────────────────────────────────
+  spdBtns.forEach(btn => {
+    if (btn.classList.contains('trim-btn')) return;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      spdBtns.forEach(b => { if (!b.classList.contains('trim-btn')) b.classList.remove('active') });
+      btn.classList.add('active');
+      audio.playbackRate = parseFloat(btn.dataset.spd);
+    });
+  });
+  
+  const trimBtn = card.querySelector('.trim-btn');
+  if (trimBtn) {
+    trimBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stopActive();
+      openTrimOverlay(card);
+    });
+  }
+
+  // ── Volume ────────────────────────────────────────
+  function updateVolIcon() {
+    const v = audio.muted ? 0 : audio.volume;
+    volIcon.textContent = v === 0 ? '🔇' : v < 0.5 ? '🔈' : '🔊';
+  }
+
+  volSlider.addEventListener('input', (e) => {
+    e.stopPropagation();
+    audio.volume = parseFloat(volSlider.value);
+    audio.muted  = false;
+    updateVolIcon();
+  });
+
+  volIcon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    audio.muted = !audio.muted;
+    if (!audio.muted) volSlider.value = audio.volume || 1;
+    updateVolIcon();
+  });
+
+  // ── Selection (Checkbox) ──────────────────────────
+  const cb = card.querySelector('.card-checkbox');
+  cb.addEventListener('change', (e) => {
+    e.stopPropagation();
+    if (cb.checked) selectedCards.add(card);
+    else selectedCards.delete(card);
+    updateBatchButton();
+  });
+
+  // ── Inline rename ─────────────────────────────────
+  const nameEl = card.querySelector('.track-name');
+  nameEl.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    // Already editing?
+    if (card.querySelector('.track-name-input')) return;
+
+    const currentLabel = nameEl.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'track-name-input';
+    input.value = currentLabel;
+
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    async function commitRename() {
+      const raw = input.value.trim();
+
+      // Restore span first (to avoid double-commit on blur after Enter)
+      input.replaceWith(nameEl);
+
+      if (!raw || raw === currentLabel) return; // no change
+
+      try {
+        const r = await fetch('/api/rename', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            old_name: card.dataset.filename,
+            new_name: raw,
+            folder:   card.dataset.folder,
+          }),
+        });
+        const d = await r.json();
+        if (d.success) {
+          const newFname = d.new_filename;
+          card.dataset.filename = newFname;
+          const newLabel = newFname.replace(/\.[^.]+$/, '');
+          nameEl.textContent = newLabel;
+          // Reset audio so next play fetches the new URL
+          const audio = card.querySelector('audio');
+          if (activeAudio === audio) stopActive();
+          audio.src = '';
+          delete audio.dataset.loaded;
+          toast(`✏️ Renamed → ${newLabel}`);
+        } else {
+          toast(`Rename failed: ${d.error}`, 'err');
+        }
+      } catch (err) {
+        toast('Server error: ' + err.message, 'err');
+      }
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter')  { e.preventDefault(); commitRename(); }
+      if (e.key === 'Escape') { input.replaceWith(nameEl); } // cancel
+    });
+
+    input.addEventListener('blur', commitRename);
+  });
+
+
+  return card;
+}
+
+// ═══════════════════════════════════════════════════════
+//  Reset card after moving between columns
+// ═══════════════════════════════════════════════════════
+function resetCardPlayer(card) {
+  const audio = card.querySelector('audio');
+  if (activeAudio === audio) stopActive();
+  audio.pause();
+  audio.src = '';
+  audio.currentTime = 0;
+  delete audio.dataset.loaded;
+  card.querySelector('.btn-play').classList.remove('is-playing');
+  card.classList.remove('is-playing');
+  card.querySelector('.progress-fill').style.width = '0%';
+  const dur = card.dataset.duration;
+  card.querySelector('.track-time').textContent = '0:00 / ' + (dur ? fmt(dur) : '0:00');
+}
+
+// ═══════════════════════════════════════════════════════
+//  Load all tracks from API
+// ═══════════════════════════════════════════════════════
+async function loadTracks() {
+  try {
+    const resp = await fetch('/api/tracks');
+    const data = await resp.json();
+    globalTracksData = data;
+
+    ['origin', 'redo', 'liked', 'disliked', 'cuts'].forEach(col => {
+      const list = document.getElementById(`list-${col}`);
+      if (!list) return;
+      list.innerHTML = '';
+      const tracks = data[col] || [];
+      if (tracks.length === 0) {
+        syncEmpty(list);
+      } else {
+            tracks.forEach(fname => list.appendChild(buildCard(fname, col)));
+      }
+      syncEmpty(list);
+    });
+
+    selectedCards.clear();
+    updateBatchButton();
+
+    syncCounts();
+    initSortable();
+  } catch (err) {
+    toast('Failed to load tracks — is the server running?', 'err');
+  } finally {
+    }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SortableJS
+// ═══════════════════════════════════════════════════════
+function initSortable() {
+  ['origin', 'redo', 'liked', 'disliked'].forEach(toCol => {
+    const listEl = document.getElementById(`list-${toCol}`);
+
+    // Guard against double-init on refresh
+    if (listEl._sortable) listEl._sortable.destroy();
+
+    listEl._sortable = Sortable.create(listEl, {
+      group: { name: 'tracks', pull: true, put: true },
+      animation:            0,
+      ghostClass:           'sortable-ghost',
+      chosenClass:          'sortable-chosen',
+      dragClass:            'sortable-drag',
+      emptyInsertThreshold: 100,
+      fallbackOnBody:       true,
+      direction:            'vertical',
+      filter:               'button, input[type=range], input[type=checkbox], .progress-wrap, .vol-slider, .vol-icon, .spd-btn, .btn-play, .track-name, .track-name-input',
+      preventOnFilter:      false,
+
+      // fired when a card drops into this list FROM another list
+      onAdd: function(evt) {
+        const card     = evt.item;
+        const fromCol  = card.dataset.folder;
+        const filename = card.dataset.filename;
+
+        if (fromCol === toCol) return;
+
+        resetCardPlayer(card);
+
+        // Use .then() instead of async/await — SortableJS doesn't support async onAdd
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 8000);
+
+        fetch('/api/move', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, from: fromCol, to: toCol }),
+          signal: controller.signal,
+        })
+          .then(r => { clearTimeout(timer); return r.json(); })
+          .then(d => {
+            if (d.success) {
+              const newFname = d.new_filename || filename;
+              card.dataset.folder   = toCol;
+              card.dataset.filename = newFname;
+              const label = newFname.replace(/\.[^.]+$/i, '');
+              card.querySelector('.track-name').textContent = label;
+              card.querySelector('.track-name').title       = newFname;
+              syncCounts();
+              toast('Moved to ' + toCol);
+            } else {
+              toast('Move failed: ' + d.error, 'err');
+            }
+          })
+          .catch(err => {
+            clearTimeout(timer);
+            if (err.name === 'AbortError') {
+              toast('Move timed out — is the server running?', 'err');
+            } else {
+              toast('Server error: ' + err.message, 'err');
+            }
+          });
+      },
+    });
+  });
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  Init
+// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  Upload overlay
+// ═══════════════════════════════════════════════════════
+(function() {
+  const overlay     = document.getElementById('upload-overlay');
+  const dropZone    = document.getElementById('drop-zone');
+  const fileInput   = document.getElementById('upload-file-input');
+  const fileList    = document.getElementById('upload-file-list');
+  const actions     = document.getElementById('upload-actions');
+  const btnStart    = document.getElementById('btn-start-upload');
+  const btnClear    = document.getElementById('btn-clear-files');
+  const btnClose    = document.getElementById('btn-close-upload');
+  const btnBrowse   = document.getElementById('btn-browse-files');
+  const btnOpen     = document.getElementById('btn-open-upload');
+  const summary     = document.getElementById('upload-summary');
+  const btnCount    = document.getElementById('upload-btn-count');
+
+  let pendingFiles = []; // Array of File objects
+
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function openUpload() { overlay.classList.add('open'); }
+  function closeUpload() {
+    overlay.classList.remove('open');
+    // Don't clear files so user can re-open and see state
+  }
+
+  btnOpen.addEventListener('click', openUpload);
+  btnClose.addEventListener('click', closeUpload);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeUpload();
+  });
+
+  // Browse button — opens file picker starting in Downloads (File System Access API)
+  async function openFilePicker(e) {
+    if (e) e.stopPropagation();
+    if (window.showOpenFilePicker) {
+      try {
+        const handles = await window.showOpenFilePicker({
+          multiple: true,
+          startIn: 'downloads',
+          types: [{
+            description: 'Audio files',
+            accept: { 'audio/*': ['.mp3', '.wav'] }
+          }]
+        });
+        const files = await Promise.all(handles.map(h => h.getFile()));
+        addFiles(files);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return; // user cancelled — do nothing
+        // API failed for another reason — fall through to classic input
+      }
+    }
+    // Fallback: classic file input
+    fileInput.click();
+  }
+
+  btnBrowse.addEventListener('click', openFilePicker);
+  dropZone.addEventListener('click', openFilePicker);
+
+  fileInput.addEventListener('change', () => addFiles(Array.from(fileInput.files)));
+
+
+  // Drag & drop
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = Array.from(e.dataTransfer.files);
+    addFiles(files);
+  });
+
+  function addFiles(files) {
+    const allowed  = files.filter(f =>  /\.(mp3|wav)$/i.test(f.name));
+    const rejected = files.filter(f => !/\.(mp3|wav)$/i.test(f.name));
+
+    // Notify about skipped files
+    if (rejected.length > 0) {
+      const names = rejected.map(f => f.name).join(', ');
+      const short = names.length > 80 ? names.slice(0, 77) + '…' : names;
+      toast(`⛔ Skipped ${rejected.length} file${rejected.length > 1 ? 's' : ''} (only .mp3 & .wav allowed):
+${short}`, 'err');
+    }
+
+    // Avoid duplicates by name+size
+    const existing = new Set(pendingFiles.map(f => f.name + f.size));
+    allowed.forEach(f => { if (!existing.has(f.name + f.size)) pendingFiles.push(f); });
+    fileInput.value = '';
+    renderFileList();
+    updateActions();
+  }
+
+  function renderFileList() {
+    fileList.innerHTML = '';
+    pendingFiles.forEach((f, i) => {
+      const item = document.createElement('div');
+      item.className = 'upload-file-item';
+      item.id = `ufi-${i}`;
+      item.innerHTML = `
+        <div class="ufi-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2dd4ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <span class="ufi-name" title="${f.name}">${f.name}</span>
+        <span class="ufi-size">${fmtSize(f.size)}</span>
+        <div class="ufi-progress-wrap"><div class="ufi-progress-fill" id="ufi-prog-${i}"></div></div>
+        <span class="ufi-status" id="ufi-st-${i}">–</span>
+      `;
+      fileList.appendChild(item);
+    });
+  }
+
+  function updateActions() {
+    if (pendingFiles.length > 0) {
+      actions.style.display = 'flex';
+      btnCount.textContent = `${pendingFiles.length} file${pendingFiles.length > 1 ? 's' : ''}`;
+    } else {
+      actions.style.display = 'none';
+      btnCount.textContent = '';
+    }
+    summary.textContent = '';
+    summary.className = 'upload-summary';
+    summary.className = 'upload-summary';
+  }
+
+  btnClear.addEventListener('click', () => {
+    pendingFiles = [];
+    renderFileList();
+    updateActions();
+  });
+
+  btnStart.addEventListener('click', async () => {
+    btnStart.disabled = true;
+    btnClear.disabled = true;
+    btnBrowse.disabled = true;
+    summary.textContent = 'Uploading...';
+    summary.className = 'upload-summary';
+
+    // Upload files one by one to show per-file progress
+
+    let successCount = 0;
+
+    let errorCount = 0;
+
+
+
+    for (let i = 0; i < pendingFiles.length; i++) {
+
+      const f = pendingFiles[i];
+
+      const progFill = document.getElementById(`ufi-prog-${i}`);
+
+      const statusEl = document.getElementById(`ufi-st-${i}`);
+
+      const itemEl   = document.getElementById(`ufi-${i}`);
+
+
+
+      try {
+
+        await new Promise((resolve, reject) => {
+
+          const xhr = new XMLHttpRequest();
+
+          xhr.open('POST', '/api/upload');
+
+
+
+          xhr.upload.addEventListener('progress', (e) => {
+
+            if (e.lengthComputable) {
+
+              const pct = Math.round((e.loaded / e.total) * 100);
+
+              progFill.style.width = pct + '%';
+
+            }
+
+          });
+
+
+
+                    xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+              const data = JSON.parse(xhr.responseText);
+              const res = data.results && data.results[0];
+              if (res && res.success) {
+                progFill.style.width = '100%';
+                progFill.style.background = 'var(--success)';
+                statusEl.textContent = '✓';
+                statusEl.style.color = 'var(--success)';
+                itemEl.classList.add('success');
+                successCount++;
+                resolve();
+              } else {
+                reject(new Error(res ? res.error : 'Unknown error'));
+              }
+            } else {
+              reject(new Error('HTTP ' + xhr.status));
+            }
+          });
+
+          xhr.addEventListener('error', () => reject(new Error('Network error')));
+          
+          const formData = new FormData();
+          formData.append('files[]', f);
+          xhr.send(formData);
+        });
+      } catch (err) {
+        errorCount++;
+        progFill.style.background = 'var(--c-disliked)';
+        statusEl.textContent = '✗';
+        statusEl.style.color = 'var(--c-disliked)';
+        itemEl.classList.add('error');
+      }
+    }
+
+    btnBrowse.disabled = false;
+    btnClear.disabled = false;
+
+    if (errorCount === 0) {
+      summary.textContent = `All ${successCount} files uploaded`;
+      summary.className = 'upload-summary done';
+      btnStart.style.display = 'none';
+      loadTracks();
+    } else {
+      summary.textContent = `Uploaded ${successCount}, failed ${errorCount}`;
+      summary.className = 'upload-summary';
+      btnStart.disabled = false;
+    }
+  });
+
+  updateActions();
+})();
+
+// Close on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && listOverlay.classList.contains('open')) {
+    stopActive();
+    listOverlay.classList.remove('open');
+    listOverlayGrid.innerHTML = '';
+  }
+});
+
+document.getElementById('btn-show-redo').addEventListener('click',   () => openListView('redo'));
+document.getElementById('btn-show-liked').addEventListener('click', () => openListView('liked'));
+document.getElementById('btn-show-disliked').addEventListener('click', () => openListView('disliked'));
+document.getElementById('btn-show-cuts').addEventListener('click', () => openListView('cuts'));
+
+document.getElementById('btn-power-off').addEventListener('click', async () => {
+
+  if (confirm('Остановить сервер? Вы не сможете пользоваться приложением до следующего запуска через ярлык.')) {
+
+    try {
+
+      await fetch('/api/shutdown', { method: 'POST' });
+
+      document.body.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100vh; color:#fff;"><h1>Server Stopped</h1></div>';
+    } catch(e) {}
+  }
+});
+
+const searchOverlay = document.getElementById('search-overlay');
+const searchInput = document.getElementById('search-input');
+const searchGrid = document.getElementById('search-overlay-grid');
+const searchCount = document.getElementById('search-overlay-count');
+const searchTagsTextarea = document.getElementById('search-tags-textarea');
+const searchNamesTextarea = document.getElementById('search-names-textarea');
+const searchCheckboxes = document.querySelectorAll('.search-cb');
+
+document.getElementById('btn-search').addEventListener('click', () => {
+  searchOverlay.classList.add('open');
+  searchInput.focus();
+  renderSearch();
+});
+
+document.getElementById('btn-close-search').addEventListener('click', () => {
+
+  stopActive();
+
+  searchOverlay.classList.remove('open');
+
+  searchGrid.innerHTML = '';
+
+});
+
+
+
+searchInput.addEventListener('input', renderSearch);
+
+searchCheckboxes.forEach(cb => cb.addEventListener('change', renderSearch));
+
+
+
+function renderSearch() {
+
+  const query = searchInput.value.toLowerCase().trim();
+
+  const activeFolders = Array.from(searchCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+
+  
+
+  stopActive();
+
+  searchGrid.innerHTML = '';
+
+  
+
+  const tags = [];
+
+  const names = [];
+
+  let count = 0;
+
+  
+
+  if (!globalTracksData || !query) {
+
+    searchCount.textContent = `0 tracks`;
+
+    searchTagsTextarea.value = '';
+
+    searchNamesTextarea.value = '';
+
+    searchTagsTextarea.classList.remove('copied');
+
+    searchNamesTextarea.classList.remove('copied');
+
+    return;
+
+  }
+
+
+
+  activeFolders.forEach(folder => {
+
+    const tracks = globalTracksData[folder] || [];
+
+    tracks.forEach(track => {
+
+      const fname = typeof track === 'string' ? track : track.name;
+
+      if (!fname) return;
+
+      if (fname.toLowerCase().includes(query)) {
+
+        count++;
+
+        const c = buildCard(track, folder, track.duration);
+
+        searchGrid.appendChild(c);
+
+        
+
+        const fnameNoExt = fname.replace(/\.[^.]+$/, '');
+
+        tags.push(fnameNoExt.slice(0, 7));
+
+        
+
+        let rest = fnameNoExt.slice(7);
+
+        if (rest.startsWith(' ')) rest = rest.slice(1);
+
+        names.push(rest);
+
+      }
+
+    });
+
+  });
+
+  
+
+  if (count === 0) {
+
+    const empty = document.createElement('div');
+
+    empty.className = 'list-overlay-empty';
+
+    empty.textContent = 'No matching tracks found';
+
+    searchGrid.appendChild(empty);
+
+  }
+
+  
+
+  searchCount.textContent = `${count} track${count !== 1 ? 's' : ''}`;
+
+  searchTagsTextarea.value = tags.join('\n');
+
+  searchNamesTextarea.value = names.join('\n');
+
+  searchTagsTextarea.classList.remove('copied');
+
+  searchNamesTextarea.classList.remove('copied');
+
+  document.getElementById('search-tags-copy-hint').textContent = 'click to copy';
+
+  document.getElementById('search-names-copy-hint').textContent = 'click to copy';
+
+}
+
+
+
+['search-tags-textarea', 'search-names-textarea'].forEach(id => {
+
+  document.getElementById(id).addEventListener('click', async function() {
+
+    const text = this.value;
+
+    if (!text) return;
+
+    try {
+
+      await navigator.clipboard.writeText(text);
+
+    } catch (e) {
+
+      this.select();
+
+      document.execCommand('copy');
+
+      window.getSelection()?.removeAllRanges();
+
+    }
+
+    const hintId = id.replace('-textarea', '-copy-hint');
+
+    document.getElementById(hintId).textContent = '✅ copied!';
+
+    this.classList.add('copied');
+
+    setTimeout(() => {
+
+      this.classList.remove('copied');
+
+      document.getElementById(hintId).textContent = 'click to copy';
+
+    }, 2000);
+
+  });
+
+});
+
+
+
+loadTracks();
+
+
+// ═══════════════════════════════════════════════════════
+// Trim Overlay Logic (slider-based)
+// ═══════════════════════════════════════════════════════
+const trimOverlay  = document.getElementById('trim-overlay');
+const trimAudio    = document.getElementById('trim-audio');
+const trimStart    = document.getElementById('trim-start');
+const trimEnd      = document.getElementById('trim-end');
+const trimPlayBtn  = document.getElementById('trim-play-btn');
+const trimProgFill = document.getElementById('trim-prog-fill');
+const trimProgDot  = document.getElementById('trim-prog-dot');
+const trimTime     = document.getElementById('trim-time');
+const trimProgWrap = document.getElementById('trim-prog-wrap');
+const trimStartLbl  = document.getElementById('trim-start-label');
+const trimEndLbl    = document.getElementById('trim-end-label');
+const trimDurLbl    = document.getElementById('trim-duration');
+const trimRangeTrack = document.getElementById('trim-range-track');
+const trimRangeFill  = document.getElementById('trim-range-fill');
+const trimHandleStart = document.getElementById('trim-handle-start');
+const trimHandleEnd   = document.getElementById('trim-handle-end');
+
+let currentTrimCard = null;
+let trimInterval = null;
+let trimTotalDur = 0;
+let trimStartVal = 0;
+let trimEndVal   = 0;
+
+function updateTrimUI() {
+  const pctStart = trimTotalDur > 0 ? (trimStartVal / trimTotalDur) * 100 : 0;
+  const pctEnd   = trimTotalDur > 0 ? (trimEndVal   / trimTotalDur) * 100 : 100;
+  trimHandleStart.style.left = pctStart + '%';
+  trimHandleEnd.style.left   = pctEnd   + '%';
+  trimRangeFill.style.left   = pctStart + '%';
+  trimRangeFill.style.width  = (pctEnd - pctStart) + '%';
+  trimStartLbl.textContent = fmt(trimStartVal);
+  trimEndLbl.textContent   = fmt(trimEndVal);
+  trimDurLbl.textContent   = fmt(Math.max(0, trimEndVal - trimStartVal));
+  // Sync hidden inputs
+  trimStart.value = trimStartVal;
+  trimEnd.value   = trimEndVal;
+}
+
+function makeDraggable(handle, isStart) {
+  let dragging = false;
+
+  function onDown(e) {
+    dragging = true;
+    handle.style.cursor = 'grabbing';
+    handle.style.boxShadow = isStart
+      ? '0 0 0 5px rgba(167,139,250,.5)'
+      : '0 0 0 5px rgba(255,255,255,.3)';
+    e.preventDefault();
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const r = trimRangeTrack.getBoundingClientRect();
+    let pct = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    let val = pct * trimTotalDur;
+    const MIN_GAP = 0.5;
+    if (isStart) {
+      trimStartVal = Math.min(val, trimEndVal - MIN_GAP);
+      trimStartVal = Math.max(0, trimStartVal);
+    } else {
+      trimEndVal = Math.max(val, trimStartVal + MIN_GAP);
+      trimEndVal = Math.min(trimTotalDur, trimEndVal);
+    }
+    updateTrimUI();
+  }
+
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    handle.style.cursor = 'grab';
+    handle.style.boxShadow = isStart
+      ? '0 0 0 3px rgba(167,139,250,.3)'
+      : '0 0 0 3px rgba(255,255,255,.15)';
+  }
+
+  handle.addEventListener('mousedown', onDown);
+  handle.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('mouseup', onUp);
+  document.addEventListener('touchend', onUp);
+}
+
+makeDraggable(trimHandleStart, true);
+makeDraggable(trimHandleEnd, false);
+
+// Click on track to seek handles
+trimRangeTrack.addEventListener('click', (e) => {
+  if (e.target === trimHandleStart || e.target === trimHandleEnd) return;
+  const r = trimRangeTrack.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  const val = pct * trimTotalDur;
+  // Move whichever handle is closer
+  if (Math.abs(val - trimStartVal) <= Math.abs(val - trimEndVal)) {
+    trimStartVal = Math.min(val, trimEndVal - 0.5);
+    trimStartVal = Math.max(0, trimStartVal);
+  } else {
+    trimEndVal = Math.max(val, trimStartVal + 0.5);
+    trimEndVal = Math.min(trimTotalDur, trimEndVal);
+  }
+  updateTrimUI();
+});
+
+function openTrimOverlay(card) {
+  currentTrimCard = card;
+  const audio = card.querySelector('audio');
+  document.getElementById('trim-track-name').textContent = card.dataset.filename;
+
+  trimTotalDur = audio.duration ? audio.duration : (parseFloat(card.dataset.duration) || 300);
+  trimStartVal = 0;
+  trimEndVal   = trimTotalDur;
+
+  trimAudio.src = audio.src || `/audio/${card.dataset.folder}/${encodeURIComponent(card.dataset.filename)}`;
+  trimAudio.currentTime = 0;
+  trimPlayBtn.classList.remove('is-playing');
+  trimProgFill.style.width = '0%';
+  trimTime.textContent = `0:00 / ${fmt(trimTotalDur)}`;
+  updateTrimUI();
+  trimOverlay.classList.add('open');
+
+  // Once audio metadata loads, update with real duration
+  trimAudio.addEventListener('loadedmetadata', function onMeta() {
+    trimTotalDur = trimAudio.duration;
+    trimEndVal   = trimTotalDur;
+    trimTime.textContent = `0:00 / ${fmt(trimTotalDur)}`;
+    updateTrimUI();
+    trimAudio.removeEventListener('loadedmetadata', onMeta);
+  });
+}
+
+trimPlayBtn.addEventListener('click', () => {
+  if (trimAudio.paused) {
+    trimAudio.currentTime = parseFloat(trimStart.value);
+    trimAudio.play();
+    trimPlayBtn.classList.add('is-playing');
+    trimInterval = setInterval(() => {
+      const start = parseFloat(trimStart.value);
+      const end = parseFloat(trimEnd.value);
+      if (trimAudio.currentTime >= end) {
+        trimAudio.pause();
+        trimPlayBtn.classList.remove('is-playing');
+        clearInterval(trimInterval);
+      }
+      const dur = end - start;
+      const cur = trimAudio.currentTime - start;
+      const pct = Math.max(0, Math.min(100, (cur / dur) * 100));
+      trimProgFill.style.width = pct + '%';
+      trimProgDot.style.right = (100 - pct) + '%';
+      trimTime.textContent = `${fmt(cur)} / ${fmt(dur)}`;
+    }, 50);
+  } else {
+    trimAudio.pause();
+    trimPlayBtn.classList.remove('is-playing');
+    clearInterval(trimInterval);
+  }
+});
+
+trimProgWrap.addEventListener('click', (e) => {
+  const start = parseFloat(trimStart.value);
+  const end = parseFloat(trimEnd.value);
+  const dur = end - start;
+  const r = trimProgWrap.getBoundingClientRect();
+  const pct = (e.clientX - r.left) / r.width;
+  trimAudio.currentTime = start + pct * dur;
+});
+
+document.getElementById('trim-cancel').addEventListener('click', () => {
+  trimAudio.pause();
+  clearInterval(trimInterval);
+  trimOverlay.classList.remove('open');
+});
+
+document.getElementById('trim-save').addEventListener('click', async () => {
+  trimAudio.pause();
+  clearInterval(trimInterval);
+  const btn = document.getElementById('trim-save');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/trim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: currentTrimCard.dataset.filename,
+        folder: currentTrimCard.dataset.folder,
+        start: parseFloat(trimStart.value),
+        end: parseFloat(trimEnd.value)
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      toast('✓ Saved to Cuts!');
+      loadTracks();
+      trimOverlay.classList.remove('open');
+    } else {
+      toast('Error: ' + data.error, 'err');
+    }
+  } catch (err) {
+    toast('Error trimming: ' + err.message, 'err');
+  }
+  btn.textContent = 'Save to Cuts';
+  btn.disabled = false;
+});
+
+// ═══════════════════════════════════════════════════════
+// List Overlay Logic (Cuts / Redo / Liked / Disliked)
+// ═══════════════════════════════════════════════════════
+const listOverlay     = document.getElementById('list-overlay');
+const listOverlayGrid = document.getElementById('list-overlay-grid');
+
+const LIST_TITLES = {
+  redo:     'Redo',
+  liked:    'Liked',
+  disliked: 'Disliked',
+  cuts:     'Cuts ✂'
+};
+const LIST_ICONS = {
+  redo: '↩', liked: '♥', disliked: '✕', cuts: '✂'
+};
+
+function openListView(folder) {
+  const title   = document.getElementById('list-overlay-title');
+  const iconEl  = document.getElementById('list-overlay-icon');
+  const countEl = document.getElementById('list-overlay-count');
+
+  title.textContent  = LIST_TITLES[folder] || folder;
+  title.className    = 'list-overlay-title ' + folder;
+  iconEl.textContent = LIST_ICONS[folder] || '♪';
+  listOverlayGrid.innerHTML = '';
+
+  const tagsTA  = document.getElementById('tags-textarea');
+  const namesTA = document.getElementById('names-textarea');
+  const tagsHint  = document.getElementById('tags-copy-hint');
+  const namesHint = document.getElementById('names-copy-hint');
+
+  // Reset textareas
+  tagsTA.value  = '';
+  namesTA.value = '';
+  tagsTA.classList.remove('copied');
+  namesTA.classList.remove('copied');
+  tagsHint.textContent  = 'click to copy';
+  namesHint.textContent = 'click to copy';
+
+  const tracks = globalTracksData ? globalTracksData[folder] : [];
+  const count  = tracks ? tracks.length : 0;
+  countEl.textContent = count + ' track' + (count !== 1 ? 's' : '');
+
+  if (!tracks || count === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'list-overlay-empty';
+    empty.textContent = 'No tracks in this folder';
+    listOverlayGrid.appendChild(empty);
+  } else {
+    const tags  = [];
+    const names = [];
+
+    tracks.forEach(t => {
+      // Build card identical to main columns
+      const card = buildCard(t, folder);
+      listOverlayGrid.appendChild(card);
+
+      // Collect tags & names
+      const fname = typeof t === 'string' ? t : t.name;
+      if (fname) {
+        const fnameNoExt = fname.replace(/\.[^.]+$/, '');
+        tags.push(fnameNoExt.slice(0, 7));
+        let rest = fnameNoExt.slice(7);
+        if (rest.startsWith('_') || rest.startsWith(' ')) rest = rest.slice(1);
+        names.push(rest);
+      }
+    });
+
+    tagsTA.value  = tags.join('\n');
+    namesTA.value = names.join('\n');
+  }
+
+  listOverlay.classList.add('open');
+}
+
+document.getElementById('btn-close-overlay').addEventListener('click', () => {
+  // Stop any playing audio in the overlay
+  listOverlayGrid.querySelectorAll('audio').forEach(a => a.pause());
+  listOverlay.classList.remove('open');
+  listOverlayGrid.innerHTML = '';
+});
+
+// Close list overlay on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (listOverlay.classList.contains('open')) {
+      listOverlayGrid.querySelectorAll('audio').forEach(a => a.pause());
+      listOverlay.classList.remove('open');
+      listOverlayGrid.innerHTML = '';
+    }
+  }
+});
+
+</script>
+</body>
+</html>

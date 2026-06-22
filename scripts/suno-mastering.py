@@ -432,8 +432,7 @@ def main():
             console.print(f"[red]❌ Error loading {METADATA_FILE.name}: {e}[/red]")
 
     # Notify Telegram about start
-    tg(f"🎛️ <b>Mastering started</b>\n{len(files)} track(s) in queue\n"
-       f"Chain: HPF · M/S EQ · Saturation · De-harsh · Dither")
+    pass
 
     results  = []
     tg_lines = []

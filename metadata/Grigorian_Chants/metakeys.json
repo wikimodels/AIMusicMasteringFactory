@@ -1,0 +1,18 @@
+{
+    "album": "Grigorian Chants",
+    "artist": "Grigorian Choirs",
+    "year": "2026",
+    "copyright": "2026 Music Factory",
+    "genre": "Gregorian Chant; Choral; Religious; Ambient",
+    "comment_template": "Gregorian Chant. {TRACK_VIBE}. For peace, meditation, and calm.",
+    "keywords_ikey": "gregorian, chant, choral, meditation, religious, calm",
+    "track_vibes": {
+        "Eternal_Light_(Lumen_Perpetuum_-_Gregorian_Requiem)": "Lumen Perpetuum, Gregorian Requiem vibe",
+        "Flowing_Time_(Aeternitatis_-_Organ_&_Voices)_1": "Aeternitatis Organ & Voices part 1",
+        "Flowing_Time_(Aeternitatis_-_Organ_&_Voices)_2": "Aeternitatis Organ & Voices part 2",
+        "Flowing_Time_(Aeternitatis_-_Organ_&_Voices)_3": "Aeternitatis Organ & Voices part 3",
+        "Lamb_of_God_(Agnus_Dei_-_Sacred_Chant)": "Agnus Dei Sacred Chant",
+        "Lord_Have_Mercy_(Miserere_-_Monastic_Prayer)": "Miserere Monastic Prayer meditation",
+        "Divine Compassion (Pietas Divina - Monastic Prayer)": "Pietas Divina Monastic Prayer meditation"
+    }
+}
