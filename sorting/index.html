@@ -1333,6 +1333,10 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       Search
     </button>
+    <button class="btn-view-list" id="btn-settings" title="Data Sources Settings" style="color:var(--accent); border-color:var(--accent); margin-left: 10px;">
+      ⚙️ Settings
+    </button>
+    <div id="navbar-album-name" class="stat-chip" style="margin-left: 10px; font-weight: bold; color: var(--accent);">No Album Selected</div>
   </div>
   
   <button class="btn-refresh" id="btn-power-off" title="Shutdown Server" style="color: var(--c-disliked); border-color: rgba(255,77,109,.3); margin-left: 6px; margin-right: 20px;">
@@ -1584,6 +1588,31 @@
       <div class="tags-copy-hint" id="search-names-copy-hint">click to copy</div>
     </div>
     <div class="list-overlay-grid" id="search-overlay-grid"></div>
+  </div>
+</div>
+
+<!-- ══════════════ SETTINGS OVERLAY ══════════════ -->
+<div class="upload-overlay" id="settings-overlay">
+  <div class="upload-panel">
+    <div class="upload-head">
+      <div>
+        <div class="upload-head-title">Data Sources (Settings)</div>
+        <div class="upload-head-sub">Select or add an album directory</div>
+      </div>
+      <button class="btn-close-upload" id="btn-close-settings" title="Close">✕</button>
+    </div>
+
+    <div style="background: var(--bg-panel); border: 1px solid var(--border-md); border-radius: var(--rl); padding: 16px;">
+      <div style="font-size: 13px; font-weight: 600; color: var(--txt-hi); margin-bottom: 12px;">Saved Albums</div>
+      <div id="settings-album-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; max-height: 40vh; overflow-y: auto;">
+        <!-- Radios will go here -->
+      </div>
+      <div style="font-size: 13px; font-weight: 600; color: var(--txt-hi); margin-bottom: 8px;">Add New Source</div>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="settings-new-path" placeholder="e.g. D:\GitHub\AIMusicMasteringFactory\Renaissance Vocals" style="flex: 1; background: var(--bg-card); border: 1px solid var(--border-md); color: var(--txt-hi); padding: 8px 12px; border-radius: var(--r); outline: none; font-size: 12px;">
+        <button id="btn-add-album" class="btn-upload" style="margin: 0; height: auto; padding: 0 16px;">Add</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -3040,6 +3069,137 @@ document.addEventListener('keydown', e => {
       listOverlay.classList.remove('open');
       listOverlayGrid.innerHTML = '';
     }
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// Settings Logic
+// ═══════════════════════════════════════════════════════
+const settingsOverlay = document.getElementById('settings-overlay');
+const btnSettings = document.getElementById('btn-settings');
+const btnCloseSettings = document.getElementById('btn-close-settings');
+const btnAddAlbum = document.getElementById('btn-add-album');
+const inputNewPath = document.getElementById('settings-new-path');
+const albumListEl = document.getElementById('settings-album-list');
+const navbarAlbumName = document.getElementById('navbar-album-name');
+
+let currentSettings = { albums: [], active_album: '' };
+
+function getBasename(path) {
+  const parts = path.split(/[\\/]/);
+  return parts.pop() || parts.pop() || path;
+}
+
+async function loadSettings() {
+  try {
+    const r = await fetch('/api/settings');
+    currentSettings = await r.json();
+    renderSettings();
+  } catch(e) {
+    console.error('Failed to load settings', e);
+  }
+}
+
+function renderSettings() {
+  albumListEl.innerHTML = '';
+  
+  if (currentSettings.albums.length === 0) {
+    albumListEl.innerHTML = '<div style="color:var(--txt-mid); font-size:12px;">No albums added yet.</div>';
+    navbarAlbumName.textContent = 'No Album Selected';
+  } else {
+    currentSettings.albums.forEach(path => {
+      const label = document.createElement('label');
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '8px';
+      label.style.cursor = 'pointer';
+      label.style.fontSize = '12px';
+      label.style.color = 'var(--txt-hi)';
+      
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'album_selection';
+      radio.value = path;
+      if (path === currentSettings.active_album) radio.checked = true;
+      
+      radio.addEventListener('change', () => setActiveAlbum(path));
+      
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(path));
+      albumListEl.appendChild(label);
+    });
+    
+    if (currentSettings.active_album) {
+      navbarAlbumName.textContent = getBasename(currentSettings.active_album);
+    } else {
+      navbarAlbumName.textContent = 'No Album Selected';
+    }
+  }
+}
+
+async function setActiveAlbum(path) {
+  try {
+    const r = await fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'set_album', path })
+    });
+    const d = await r.json();
+    if(d.error) { toast(d.error, 'err'); return; }
+    currentSettings = d;
+    renderSettings();
+    toast('Album changed to ' + getBasename(path));
+    settingsOverlay.classList.remove('open');
+    loadTracks();
+  } catch(e) {
+    toast('Error changing album', 'err');
+  }
+}
+
+btnAddAlbum.addEventListener('click', async () => {
+  const path = inputNewPath.value.trim();
+  if(!path) return;
+  btnAddAlbum.disabled = true;
+  try {
+    const r = await fetch('/api/settings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'add_album', path })
+    });
+    const d = await r.json();
+    if(d.error) {
+      toast(d.error, 'err');
+    } else {
+      currentSettings = d;
+      inputNewPath.value = '';
+      renderSettings();
+      toast('Added album ' + getBasename(path));
+      settingsOverlay.classList.remove('open');
+      loadTracks();
+    }
+  } catch(e) {
+    toast('Error adding album', 'err');
+  }
+  btnAddAlbum.disabled = false;
+});
+
+if (btnSettings) btnSettings.addEventListener('click', () => {
+  loadSettings();
+  settingsOverlay.classList.add('open');
+});
+if (btnCloseSettings) btnCloseSettings.addEventListener('click', () => settingsOverlay.classList.remove('open'));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && settingsOverlay.classList.contains('open')) {
+    settingsOverlay.classList.remove('open');
+  }
+});
+
+loadSettings().then(() => {
+  if (!currentSettings.active_album) {
+    toast('Please add an album in Settings', 'err');
+  } else {
+    loadTracks();
   }
 });
 
