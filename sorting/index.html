@@ -1250,6 +1250,54 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .upload-summary.done { color: var(--success); }
+
+    /* ── Action buttons ────────────────────────────── */
+    .card-actions-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .action-btn {
+      width: 26px; height: 26px;
+      border-radius: 4px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-md);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--t);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .action-btn svg { width: 14px; height: 14px; pointer-events: none; }
+    .action-btn:hover { background: var(--bg-card-hv); border-color: currentColor; }
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      background-color: currentColor;
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    @keyframes ripple {
+      to { transform: scale(4); opacity: 0; }
+    }
+    .track-card.moving {
+      transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: scale(0.9) translateY(10px);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Hide the button corresponding to the current folder */
+    .track-card[data-folder="redo"] .action-btn[data-target="redo"],
+    .track-card[data-folder="disliked"] .action-btn[data-target="disliked"],
+    .track-card[data-folder="liked"] .action-btn[data-target="liked"],
+    .track-card[data-folder="origin"] .action-btn[data-target="origin"] {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -1760,6 +1808,12 @@ function buildCard(trackData, folder, durOpt) {
       <span class="vol-icon" title="Mute / Unmute">🔈</span>
       <input type="range" class="vol-slider" min="0" max="1" step="0.01" value="0.3">
     </div>
+    <div class="card-actions-row">
+      <button class="action-btn" data-target="redo" title="Move to Redo" style="color:var(--c-redo);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg></button>
+      <button class="action-btn" data-target="disliked" title="Move to Disliked" style="color:var(--c-disliked);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg></button>
+      <button class="action-btn" data-target="liked" title="Move to Liked" style="color:var(--c-liked);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
+      <button class="action-btn" data-target="origin" title="Move to Origin" style="color:var(--c-origin);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></button>
+    </div>
     <audio preload="none"></audio>
   `;
 
@@ -1952,6 +2006,74 @@ function buildCard(trackData, folder, durOpt) {
     input.addEventListener('blur', commitRename);
   });
 
+  // ── Action Buttons (Move) ─────────────────────────
+  const actionBtns = card.querySelectorAll('.action-btn');
+  actionBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      
+      // Ripple effect
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+
+      const targetFolder = btn.dataset.target;
+      if (card.dataset.folder === targetFolder) {
+         toast('Already in ' + targetFolder);
+         return;
+      }
+
+      // Add moving animation
+      card.classList.add('moving');
+      
+      setTimeout(() => {
+        const fromCol = card.dataset.folder;
+        const filename = card.dataset.filename;
+        
+        resetCardPlayer(card);
+        
+        fetch('/api/move', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, from: fromCol, to: targetFolder }),
+        })
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) {
+            const newFname = d.new_filename || filename;
+            card.dataset.folder = targetFolder;
+            card.dataset.filename = newFname;
+            const label = newFname.replace(/\.[^.]+$/i, '');
+            card.querySelector('.track-name').textContent = label;
+            card.querySelector('.track-name').title = newFname;
+            
+            document.getElementById(`list-${targetFolder}`).appendChild(card);
+            card.classList.remove('moving');
+            syncCounts();
+            syncEmpty(document.getElementById(`list-${fromCol}`));
+            syncEmpty(document.getElementById(`list-${targetFolder}`));
+            toast('Moved to ' + targetFolder);
+          } else {
+            card.classList.remove('moving');
+            toast('Move failed: ' + d.error, 'err');
+          }
+        })
+        .catch(err => {
+           card.classList.remove('moving');
+           toast('Server error: ' + err.message, 'err');
+        });
+      }, 1000);
+    });
+  });
 
   return card;
 }
