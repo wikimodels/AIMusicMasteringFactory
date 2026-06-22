@@ -1306,13 +1306,13 @@
 <header class="header">
   <div class="logo">
     <div class="logo-icon">🎛</div>
-    <div>
-      <div class="logo-text">Music Sorting Studio</div>
-      <div class="logo-sub">Drag · Play · Sort</div>
+    <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 9px;">
+      <div class="logo-text" style="line-height: 1;">Music Sorting Studio</div>
+      <div class="logo-sub" style="line-height: 1;">Drag · Play · Sort</div>
     </div>
   </div>
 
-  <div class="header-stats">
+  <div class="header-stats" style="margin-right: 0;">
     <span id="cnt-origin" style="display:none;">0</span>
     <label class="btn-view-list" style="cursor:pointer; user-select:none;">
       <input type="checkbox" id="cb-select-all" class="card-checkbox" style="margin:0;" title="Select / Deselect All">
@@ -1336,8 +1336,8 @@
     <button class="btn-view-list" id="btn-settings" title="Data Sources Settings" style="color:var(--accent); border-color:var(--accent); margin-left: 10px;">
       ⚙️ Settings
     </button>
-    <div id="navbar-album-name" class="stat-chip" style="margin-left: 10px; font-weight: bold; color: var(--accent);">No Album Selected</div>
   </div>
+  <div id="navbar-album-name" class="stat-chip" style="margin: 0 auto; font-weight: bold; color: var(--accent); font-size: 12px;">No Album Selected</div>
   
   <button class="btn-refresh" id="btn-power-off" title="Shutdown Server" style="color: var(--c-disliked); border-color: rgba(255,77,109,.3); margin-left: 6px; margin-right: 20px;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
