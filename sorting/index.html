@@ -1391,8 +1391,11 @@
 
 <!-- ══════════════ TRIM OVERLAY ══════════════ -->
 <div class="overlay" id="trim-overlay">
-  <div class="dialog" style="max-width: 560px;">
-    <div class="dialog-title" style="color: var(--c-cuts);">✂ Trim Track</div>
+  <div class="dialog" style="max-width: 70%; width: 70%; position: relative; top: -60px;">
+    <div class="dialog-title" style="color: var(--c-cuts); display: flex; justify-content: space-between; align-items: center;">
+      <span>✂ Trim Track</span>
+      <button class="btn-close-overlay" id="trim-close-cross" style="margin: 0; width: 28px; height: 28px; font-size: 14px;" title="Close">✕</button>
+    </div>
     <div class="dialog-body">
       <div id="trim-track-name" class="dialog-fname" style="margin-bottom: 18px; font-size: 12px;"></div>
 
@@ -1409,6 +1412,9 @@
           <div class="progress-dot" id="trim-prog-dot"></div>
         </div>
         <span class="track-time" id="trim-time">0:00 / 0:00</span>
+        <span class="vol-sep"></span>
+        <span class="vol-icon" id="trim-vol-icon" title="Mute / Unmute">🔈</span>
+        <input type="range" id="trim-vol-slider" class="vol-slider" min="0" max="1" step="0.01" value="0.3" style="width: 60px; flex: none;">
         <audio id="trim-audio" preload="none"></audio>
       </div>
 
@@ -2552,6 +2558,27 @@ const trimRangeTrack = document.getElementById('trim-range-track');
 const trimRangeFill  = document.getElementById('trim-range-fill');
 const trimHandleStart = document.getElementById('trim-handle-start');
 const trimHandleEnd   = document.getElementById('trim-handle-end');
+const trimVolIcon    = document.getElementById('trim-vol-icon');
+const trimVolSlider  = document.getElementById('trim-vol-slider');
+
+function updateTrimVolIcon() {
+  const v = trimAudio.muted ? 0 : trimAudio.volume;
+  trimVolIcon.textContent = v === 0 ? '🔇' : v < 0.5 ? '🔈' : '🔊';
+}
+
+trimVolSlider.addEventListener('input', (e) => {
+  e.stopPropagation();
+  trimAudio.volume = parseFloat(trimVolSlider.value);
+  trimAudio.muted  = false;
+  updateTrimVolIcon();
+});
+
+trimVolIcon.addEventListener('click', (e) => {
+  e.stopPropagation();
+  trimAudio.muted = !trimAudio.muted;
+  if (!trimAudio.muted) trimVolSlider.value = trimAudio.volume || 1;
+  updateTrimVolIcon();
+});
 
 let currentTrimCard = null;
 let trimInterval = null;
@@ -2572,6 +2599,7 @@ function updateTrimUI() {
   // Sync hidden inputs
   trimStart.value = trimStartVal;
   trimEnd.value   = trimEndVal;
+  if (typeof updateTrimProgressUI === 'function') updateTrimProgressUI();
 }
 
 function makeDraggable(handle, isStart) {
@@ -2651,6 +2679,10 @@ function openTrimOverlay(card) {
 
   trimAudio.src = audio.src || `/audio/${card.dataset.folder}/${encodeURIComponent(card.dataset.filename)}`;
   trimAudio.currentTime = 0;
+  trimAudio.volume = 0.3;
+  trimVolSlider.value = 0.3;
+  trimAudio.muted = false;
+  updateTrimVolIcon();
   trimPlayBtn.classList.remove('is-playing');
   trimProgFill.style.width = '0%';
   trimTime.textContent = `0:00 / ${fmt(trimTotalDur)}`;
@@ -2667,9 +2699,24 @@ function openTrimOverlay(card) {
   });
 }
 
+function updateTrimProgressUI() {
+  const dur = trimTotalDur;
+  if (!dur || dur <= 0) return;
+  const cur = trimAudio.currentTime;
+  const pct = Math.max(0, Math.min(100, (cur / dur) * 100));
+  trimProgFill.style.width = pct + '%';
+  trimProgDot.style.right = (100 - pct) + '%';
+  trimTime.textContent = `${fmt(Math.max(0, cur))} / ${fmt(dur)}`;
+}
+
 trimPlayBtn.addEventListener('click', () => {
   if (trimAudio.paused) {
-    trimAudio.currentTime = parseFloat(trimStart.value);
+    const start = parseFloat(trimStart.value);
+    const end = parseFloat(trimEnd.value);
+    // If at or past the end of the trim region, loop back to the start of the trim region
+    if (trimAudio.currentTime >= end - 0.05) {
+      trimAudio.currentTime = start;
+    }
     trimAudio.play();
     trimPlayBtn.classList.add('is-playing');
     trimInterval = setInterval(() => {
@@ -2679,13 +2726,11 @@ trimPlayBtn.addEventListener('click', () => {
         trimAudio.pause();
         trimPlayBtn.classList.remove('is-playing');
         clearInterval(trimInterval);
+        trimAudio.currentTime = start;
+        updateTrimProgressUI();
+      } else {
+        updateTrimProgressUI();
       }
-      const dur = end - start;
-      const cur = trimAudio.currentTime - start;
-      const pct = Math.max(0, Math.min(100, (cur / dur) * 100));
-      trimProgFill.style.width = pct + '%';
-      trimProgDot.style.right = (100 - pct) + '%';
-      trimTime.textContent = `${fmt(cur)} / ${fmt(dur)}`;
     }, 50);
   } else {
     trimAudio.pause();
@@ -2695,15 +2740,21 @@ trimPlayBtn.addEventListener('click', () => {
 });
 
 trimProgWrap.addEventListener('click', (e) => {
-  const start = parseFloat(trimStart.value);
-  const end = parseFloat(trimEnd.value);
-  const dur = end - start;
+  const dur = trimTotalDur;
+  if (!dur || dur <= 0) return;
   const r = trimProgWrap.getBoundingClientRect();
-  const pct = (e.clientX - r.left) / r.width;
-  trimAudio.currentTime = start + pct * dur;
+  const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  trimAudio.currentTime = pct * dur;
+  updateTrimProgressUI();
 });
 
 document.getElementById('trim-cancel').addEventListener('click', () => {
+  trimAudio.pause();
+  clearInterval(trimInterval);
+  trimOverlay.classList.remove('open');
+});
+
+document.getElementById('trim-close-cross').addEventListener('click', () => {
   trimAudio.pause();
   clearInterval(trimInterval);
   trimOverlay.classList.remove('open');

@@ -71,7 +71,10 @@ def api_tracks():
 def serve_audio(folder, filename):
     if folder not in FOLDERS:
         return jsonify({'error': 'Invalid folder'}), 404
-    return send_from_directory(FOLDERS[folder], filename)
+    
+    response = send_from_directory(FOLDERS[folder], filename)
+    response.headers['Accept-Ranges'] = 'bytes'
+    return response
 
 
 @app.route('/api/move', methods=['POST'])
