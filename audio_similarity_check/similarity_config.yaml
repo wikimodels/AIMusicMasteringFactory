@@ -1,0 +1,45 @@
+# Audio Similarity Checker Configuration
+
+# Audio processing
+sr: 22050
+segment_duration: 30
+n_segments: 5
+n_fft: 4096
+hop_length: 512
+n_mels: 128
+n_mfcc: 20
+
+# Feature cache directory (absolute path recommended)
+# If not set, uses first track's parent folder
+cache_dir: "D:/AudioCache/features_cache"
+
+# Cache version (change to invalidate cache)
+config_version: "4.0"
+
+# Similarity thresholds (percentiles of baseline distribution)
+red_percentile: 99.0
+yellow_percentile: 95.0
+min_pairs_for_calibration: 30
+
+# Performance
+workers: 0  # 0 = auto (all CPUs)
+use_gpu: false
+early_exit_threshold: 0.995
+
+# Logging
+log_level: "INFO"
+
+# Output
+top_k: 10
+
+# Audio extensions
+audio_extensions:
+  - ".mp3"
+  - ".wav"
+  - ".flac"
+  - ".m4a"
+  - ".aac"
+  - ".ogg"
+
+# Output directory for reports
+output_dir: "D:/GitHub/AIMusicMasteringFactory/audio_similarity_check/output"

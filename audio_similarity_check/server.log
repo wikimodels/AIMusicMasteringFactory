@@ -1,0 +1,170 @@
+03:17:49 | INFO     | server               | ============================================================
+03:17:49 | INFO     | server               | SERVER STARTUP
+03:17:49 | INFO     | server               | ============================================================
+03:17:49 | INFO     | server               | Working directory: D:\GitHub\AIMusicMasteringFactory\audio_similarity_check
+03:17:49 | INFO     | server               | Python: C:\Users\Vitali\AppData\Local\pypoetry\Cache\virtualenvs\sound-mastering-ddXEiBPa-py3.11\Scripts\python.exe
+03:17:51 | INFO     | arrayops             | ArrayOps: CPU (NumPy)
+03:17:51 | DEBUG    | compare              | segment pair (0,0) fused_sim=0.8117
+03:17:51 | DEBUG    | compare              | segment pair (0,1) fused_sim=0.8501
+03:17:51 | DEBUG    | compare              | segment pair (0,2) fused_sim=0.6584
+03:17:51 | DEBUG    | compare              | segment pair (0,3) fused_sim=0.7369
+03:17:51 | DEBUG    | compare              | segment pair (0,4) fused_sim=0.7831
+03:17:51 | DEBUG    | compare              | segment pair (1,0) fused_sim=0.7910
+03:17:51 | DEBUG    | compare              | segment pair (1,1) fused_sim=0.8333
+03:17:51 | DEBUG    | compare              | segment pair (1,2) fused_sim=0.8435
+03:17:51 | DEBUG    | compare              | segment pair (1,3) fused_sim=0.8434
+03:17:51 | DEBUG    | compare              | segment pair (1,4) fused_sim=0.8553
+03:17:51 | DEBUG    | compare              | segment pair (2,0) fused_sim=0.7360
+03:17:51 | DEBUG    | compare              | segment pair (2,1) fused_sim=0.8724
+03:17:51 | DEBUG    | compare              | segment pair (2,2) fused_sim=0.8730
+03:17:51 | DEBUG    | compare              | segment pair (2,3) fused_sim=0.8353
+03:17:51 | DEBUG    | compare              | segment pair (2,4) fused_sim=0.8390
+03:17:51 | DEBUG    | compare              | segment pair (3,0) fused_sim=0.7412
+03:17:51 | DEBUG    | compare              | segment pair (3,1) fused_sim=0.8483
+03:17:51 | DEBUG    | compare              | segment pair (3,2) fused_sim=0.8568
+03:17:51 | DEBUG    | compare              | segment pair (3,3) fused_sim=0.8137
+03:17:51 | DEBUG    | compare              | segment pair (3,4) fused_sim=0.8182
+03:17:51 | DEBUG    | compare              | segment pair (4,0) fused_sim=0.7566
+03:17:51 | DEBUG    | compare              | segment pair (4,1) fused_sim=0.7868
+03:17:51 | DEBUG    | compare              | segment pair (4,2) fused_sim=0.7998
+03:17:51 | DEBUG    | compare              | segment pair (4,3) fused_sim=0.7935
+03:17:51 | DEBUG    | compare              | segment pair (4,4) fused_sim=0.8044
+03:17:51 | INFO     | arrayops             | ArrayOps: CPU (NumPy)
+03:17:51 | DEBUG    | compare              | segment pair (0,0) fused_sim=0.6248
+03:17:51 | DEBUG    | compare              | segment pair (0,1) fused_sim=0.7030
+03:17:51 | DEBUG    | compare              | segment pair (0,2) fused_sim=0.6243
+03:17:51 | DEBUG    | compare              | segment pair (0,3) fused_sim=0.5291
+03:17:51 | DEBUG    | compare              | segment pair (0,4) fused_sim=0.6431
+03:17:51 | DEBUG    | compare              | segment pair (1,0) fused_sim=0.6475
+03:17:51 | DEBUG    | compare              | segment pair (1,1) fused_sim=0.7475
+03:17:51 | DEBUG    | compare              | segment pair (1,2) fused_sim=0.7438
+03:17:51 | DEBUG    | compare              | segment pair (1,3) fused_sim=0.6846
+03:17:51 | DEBUG    | compare              | segment pair (1,4) fused_sim=0.6827
+03:17:51 | DEBUG    | compare              | segment pair (2,0) fused_sim=0.5882
+03:17:51 | DEBUG    | compare              | segment pair (2,1) fused_sim=0.7335
+03:17:51 | DEBUG    | compare              | segment pair (2,2) fused_sim=0.6843
+03:17:51 | DEBUG    | compare              | segment pair (2,3) fused_sim=0.6912
+03:17:51 | DEBUG    | compare              | segment pair (2,4) fused_sim=0.7214
+03:17:51 | DEBUG    | compare              | segment pair (3,0) fused_sim=0.6066
+03:17:51 | DEBUG    | compare              | segment pair (3,1) fused_sim=0.7264
+03:17:51 | DEBUG    | compare              | segment pair (3,2) fused_sim=0.6781
+03:17:51 | DEBUG    | compare              | segment pair (3,3) fused_sim=0.6889
+03:17:51 | DEBUG    | compare              | segment pair (3,4) fused_sim=0.7134
+03:17:51 | DEBUG    | compare              | segment pair (4,0) fused_sim=0.6121
+03:17:51 | DEBUG    | compare              | segment pair (4,1) fused_sim=0.7177
+03:17:51 | DEBUG    | compare              | segment pair (4,2) fused_sim=0.6834
+03:17:51 | DEBUG    | compare              | segment pair (4,3) fused_sim=0.6882
+03:17:51 | DEBUG    | compare              | segment pair (4,4) fused_sim=0.7073
+03:17:51 | INFO     | arrayops             | ArrayOps: CPU (NumPy)
+03:17:51 | DEBUG    | compare              | segment pair (0,0) fused_sim=0.6659
+03:17:51 | DEBUG    | compare              | segment pair (0,1) fused_sim=0.5761
+03:17:51 | DEBUG    | compare              | segment pair (0,2) fused_sim=0.5718
+03:17:51 | DEBUG    | compare              | segment pair (0,3) fused_sim=0.5658
+03:17:51 | DEBUG    | compare              | segment pair (0,4) fused_sim=0.6662
+03:17:51 | DEBUG    | compare              | segment pair (1,0) fused_sim=0.6742
+03:17:51 | DEBUG    | compare              | segment pair (1,1) fused_sim=0.6052
+03:17:51 | DEBUG    | compare              | segment pair (1,2) fused_sim=0.6051
+03:17:51 | DEBUG    | compare              | segment pair (1,3) fused_sim=0.5862
+03:17:51 | DEBUG    | compare              | segment pair (1,4) fused_sim=0.6743
+03:17:51 | DEBUG    | compare              | segment pair (2,0) fused_sim=0.6539
+03:17:51 | DEBUG    | compare              | segment pair (2,1) fused_sim=0.6180
+03:17:51 | DEBUG    | compare              | segment pair (2,2) fused_sim=0.6198
+03:17:51 | DEBUG    | compare              | segment pair (2,3) fused_sim=0.5949
+03:17:51 | DEBUG    | compare              | segment pair (2,4) fused_sim=0.6739
+03:17:51 | DEBUG    | compare              | segment pair (3,0) fused_sim=0.6414
+03:17:51 | DEBUG    | compare              | segment pair (3,1) fused_sim=0.6297
+03:17:51 | DEBUG    | compare              | segment pair (3,2) fused_sim=0.6187
+03:17:51 | DEBUG    | compare              | segment pair (3,3) fused_sim=0.5924
+03:17:51 | DEBUG    | compare              | segment pair (3,4) fused_sim=0.6544
+03:17:51 | DEBUG    | compare              | segment pair (4,0) fused_sim=0.6360
+03:17:51 | DEBUG    | compare              | segment pair (4,1) fused_sim=0.6225
+03:17:51 | DEBUG    | compare              | segment pair (4,2) fused_sim=0.6196
+03:17:51 | DEBUG    | compare              | segment pair (4,3) fused_sim=0.5946
+03:17:51 | DEBUG    | compare              | segment pair (4,4) fused_sim=0.6637
+03:17:51 | INFO     | arrayops             | ArrayOps: CPU (NumPy)
+03:17:51 | DEBUG    | compare              | segment pair (0,0) fused_sim=0.6222
+03:17:51 | DEBUG    | compare              | segment pair (0,1) fused_sim=0.6033
+03:17:51 | DEBUG    | compare              | segment pair (0,2) fused_sim=0.5916
+03:17:51 | DEBUG    | compare              | segment pair (0,3) fused_sim=0.6609
+03:17:51 | DEBUG    | compare              | segment pair (0,4) fused_sim=0.6025
+03:17:51 | DEBUG    | compare              | segment pair (1,0) fused_sim=0.7410
+03:17:51 | DEBUG    | compare              | segment pair (1,1) fused_sim=0.8013
+03:17:51 | DEBUG    | compare              | segment pair (1,2) fused_sim=0.7865
+03:17:51 | DEBUG    | compare              | segment pair (1,3) fused_sim=0.8236
+03:17:51 | DEBUG    | compare              | segment pair (1,4) fused_sim=0.7079
+03:17:51 | DEBUG    | compare              | segment pair (2,0) fused_sim=0.6989
+03:17:51 | DEBUG    | compare              | segment pair (2,1) fused_sim=0.7278
+03:17:51 | DEBUG    | compare              | segment pair (2,2) fused_sim=0.7200
+03:17:51 | DEBUG    | compare              | segment pair (2,3) fused_sim=0.7743
+03:17:51 | DEBUG    | compare              | segment pair (2,4) fused_sim=0.6704
+03:17:51 | DEBUG    | compare              | segment pair (3,0) fused_sim=0.7106
+03:17:51 | DEBUG    | compare              | segment pair (3,1) fused_sim=0.7298
+03:17:51 | DEBUG    | compare              | segment pair (3,2) fused_sim=0.7228
+03:17:51 | DEBUG    | compare              | segment pair (3,3) fused_sim=0.7896
+03:17:51 | DEBUG    | compare              | segment pair (3,4) fused_sim=0.6793
+03:17:51 | DEBUG    | compare              | segment pair (4,0) fused_sim=0.7755
+03:17:51 | DEBUG    | compare              | segment pair (4,1) fused_sim=0.7092
+03:17:51 | DEBUG    | compare              | segment pair (4,2) fused_sim=0.6991
+03:17:51 | DEBUG    | compare              | segment pair (4,3) fused_sim=0.7944
+03:17:51 | DEBUG    | compare              | segment pair (4,4) fused_sim=0.7163
+03:17:51 | INFO     | arrayops             | ArrayOps: CPU (NumPy)
+03:17:51 | DEBUG    | compare              | segment pair (0,0) fused_sim=0.6132
+03:17:51 | DEBU03:17:52 | INFO     | baseline             | Baseline done: 28 pairs, median=0.785
+03:17:52 | DEBUG    | dashboard            | [JOB 60a7b9fe] Progress: 60% - Baseline ready [1/1]
+03:17:52 | DEBUG    | dashboard            | [JOB 60a7b9fe] Progress: 60% - Classifying... [0/28]
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: Afro_Shev,_Marshal_Soul_-_Mutter.m4a <-> В_темноте - Copy.m4a = 0.8898 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: Afro_Shev,_Marshal_Soul_-_Mutter.m4a <-> House_of_Dragon_S02_E01_1.mp3 = 0.8602 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: Afro_Shev,_Marshal_Soul_-_Mutter.m4a <-> В_темноте.m4a = 0.8898 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: House_of_Dragon_S02_E01_1.mp3 <-> В_темноте - Copy.m4a = 0.8233 (GREEN)
+03:17:52 | DEBUG    | dashboard            | [JOB 60a7b9fe] Progress: 72% - Classifying... [10/28]
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: House_of_Dragon_S02_E01_1.mp3 <-> В_темноте.m4a = 0.8233 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: tochka_k_-_Приём_Феникса.m4a <-> В_темноте - Copy.m4a = 0.8236 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: tochka_k_-_Приём_Феникса.m4a <-> В_темноте.m4a = 0.8236 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: tochka_k_-_Приём_Феникса.m4a <-> гавнецо.m4a = 0.8679 (GREEN)
+03:17:52 | INFO     | analyze              | HIGH SIMILARITY: tochka_k_-_Приём_Феникса.m4a <-> Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a = 0.8679 (GREEN)
+03:17:52 | WARNING  | analyze              | EXACT pair: В_темноте - Copy.m4a <-> В_темноте.m4a (similarity forced to 1.0)
+03:17:52 | DEBUG    | dashboard            | [JOB 60a7b9fe] Progress: 85% - Classifying... [20/28]
+03:17:52 | WARNING  | analyze              | EXACT pair: гавнецо.m4a <-> Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a (similarity forced to 1.0)
+03:17:52 | DEBUG    | dashboard            | [JOB 60a7b9fe] Progress: 95% - Classifying complete [28/28]
+03:17:52 | DEBUG    | dashboard            | [JOB 60a7b9fe] Progress: 100% - Complete [1/1]
+03:17:52 | INFO     | analyze              | Full rebuild done in 3.7s. Reports saved to D:\GitHub\AIMusicMasteringFactory\audio_similarity_check\output
+03:17:52 | INFO     | dashboard            | [JOB 60a7b9fe] Completed successfully in 3.8s
+03:17:52 | DEBUG    | dashboard            | GET /api/jobs/60a7b9fe/results
+03:17:52 | INFO     | werkzeug             | 127.0.0.1 - - [24/Aug/2026 03:17:52] "GET /api/jobs/60a7b9fe/results HTTP/1.1" 200 -
+03:18:05 | INFO     | dashboard            | Audio request: В_темноте - Copy.m4a
+03:18:05 | DEBUG    | dashboard            | Serving audio: C:\Users\Vitali\Downloads\YandexMusic\В_темноте - Copy.m4a
+03:18:05 | INFO     | werkzeug             | 127.0.0.1 - - [24/Aug/2026 03:18:05] "[36mGET /api/audio/В_темноте%20-%20Copy.m4a HTTP/1.1[0m" 304 -
+03:18:06 | INFO     | werkzeug             | 127.0.0.1 - - [24/Aug/2026 03:18:06] "[36mGET /static/favicon.ico HTTP/1.1[0m" 304 -
+03:18:10 | INFO     | dashboard            | Audio request: tochka_k_-_Приём_Феникса.m4a
+03:18:10 | DEBUG    | dashboard            | Serving audio: C:\Users\Vitali\Downloads\YandexMusic\tochka_k_-_Приём_Феникса.m4a
+03:18:10 | INFO     | werkzeug             | 127.0.0.1 - - [24/Aug/2026 03:18:10] "[36mGET /api/audio/tochka_k_-_Приём_Феникса.m4a HTTP/1.1[0m" 304 -
+   | compare              | segment pair (4,1) fused_sim=0.6876
+03:17:51 | DEBUG    | compare              | segment pair (4,2) fused_sim=0.6967
+03:17:51 | DEBUG    | compare              | segment pair (4,3) fused_sim=0.6443
+03:17:51 | DEBUG    | compare              | segment pair (4,4) fused_sim=0.7720
+03:17:51 | INFO     | arrayops             | ArrayOps: CPU (NumPy)
+03:17:51 | DEBUG    | compare              | segment pair (0,0) fused_sim=0.7162
+03:17:51 | DEBUG    | compare              | segment pair (0,1) fused_sim=0.6757
+03:17:51 | DEBUG    | compare              | segment pair (0,2) fused_sim=0.6898
+03:17:51 | DEBUG    | compare              | segment pair (0,3) fused_sim=0.6333
+03:17:51 | DEBUG    | compare              | segment pair (0,4) fused_sim=0.7533
+03:17:51 | DEBUG    | compare              | segment pair (1,0) fused_sim=0.6186
+03:17:51 | DEBUG    | compare              | segment pair (1,1) fused_sim=0.7660
+03:17:51 | DEBUG    | compare              | segment pair (1,2) fused_sim=0.7424
+03:17:51 | DEBUG    | compare              | segment pair (1,3) fused_sim=0.7606
+03:17:51 | DEBUG    | compare              | segment pair (1,4) fused_sim=0.7110
+03:17:51 | DEBUG    | compare              | segment pair (2,0) fused_sim=0.6116
+03:17:51 | DEBUG    | compare              | segment pair (2,1) fused_sim=0.7404
+03:17:51 | DEBUG    | compare              | segment pair (2,2) fused_sim=0.7255
+03:17:51 | DEBUG    | compare              | segment pair (2,3) fused_sim=0.7440
+03:17:51 | DEBUG    | compare              | segment pair (2,4) fused_sim=0.7051
+03:17:51 | DEBUG    | compare              | segment pair (3,0) fused_sim=0.7086
+03:17:51 | DEBUG    | compare              | segment pair (3,1) fused_sim=0.7620
+03:17:51 | DEBUG    | compare              | segment pair (3,2) fused_sim=0.7592
+03:17:51 | DEBUG    | compare              | segment pair (3,3) fused_sim=0.7528
+03:17:51 | DEBUG    | compare              | segment pair (3,4) fused_sim=0.7851
+03:17:51 | DEBUG    | compare              | segment pair (4,0) fused_sim=0.6453
+03:17:51 | DEBUG    | compare              | segment pair (4,1) fused_sim=0.6876
+03:17:51 | DEBUG    | compare              | segment pair (4,2) fused_sim=0.6967
+03:17:51 | DEBUG    | compare              | segment pair (4,3) fused_sim=0.6443
+03:17:51 | DEBUG    | compare              | segment pair (4,4) fused_sim=0.7720

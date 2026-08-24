@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Similarity Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1D192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #31111D;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #410E0B;
+            --md-sys-color-background: #1C1B1F;
+            --md-sys-color-on-background: #E6E1E5;
+            --md-sys-color-surface: #1C1B1F;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-surface-variant: #2B2930;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-outline-variant: #49454F;
+            --md-sys-color-inverse-surface: #E6E1E5;
+            --md-sys-color-inverse-on-surface: #313033;
+            --md-sys-color-inverse-primary: #6750A4;
+            --md-sys-color-shadow: #000000;
+            --md-sys-color-scrim: #000000;
+            --md-sys-elevation-level1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            --md-sys-elevation-level2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+            --md-sys-elevation-level3: 0 4px 8px 3px rgba(0,0,0,0.4);
+            --md-sys-shape-corner-small: 4px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-full: 9999px;
+            --md-sys-typescale-headline-large: 57px / 64px;
+            --md-sys-typescale-headline-medium: 45px / 52px;
+            --md-sys-typescale-headline-small: 36px / 44px;
+            --md-sys-typescale-title-large: 22px / 28px;
+            --md-sys-typescale-title-medium: 16px / 24px;
+            --md-sys-typescale-title-small: 14px / 20px;
+            --md-sys-typescale-body-large: 16px / 24px;
+            --md-sys-typescale-body-medium: 14px / 20px;
+            --md-sys-typescale-body-small: 12px / 16px;
+            --md-sys-typescale-label-large: 14px / 20px;
+            --md-sys-typescale-label-medium: 12px / 16px;
+            --md-sys-typescale-label-small: 11px / 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 14px; }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .app-bar {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--md-sys-color-surface);
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            padding: 16px 24px;
+            display: flex; align-items: center; gap: 16px;
+            box-shadow: var(--md-sys-elevation-level1);
+        }
+        .app-bar__title {
+            font: var(--md-sys-typescale-headline-small);
+            font-weight: 400;
+            color: var(--md-sys-color-on-surface);
+            display: flex; align-items: center; gap: 12px;
+        }
+        .app-bar__title .material-icons-round { font-size: 28px; color: var(--md-sys-color-primary); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+        .section { margin-bottom: 24px; }
+        .section__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+        .section__title { font: var(--md-sys-typescale-title-large); font-weight: 500; color: var(--md-sys-color-on-surface); }
+
+        .card {
+            background: var(--md-sys-color-surface);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-level1);
+            overflow: hidden;
+        }
+        .card--elevated { box-shadow: var(--md-sys-elevation-level2); }
+        .card__content { padding: 24px; }
+
+        /* Button styles */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            font: var(--md-sys-typescale-label-large); font-weight: 500;
+            border: none; border-radius: var(--md-sys-shape-corner-full);
+            padding: 10px 24px; cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none; white-space: nowrap;
+        }
+        .btn .material-icons-round { font-size: 20px; }
+        .btn:disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
+
+        .btn--filled { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+        .btn--filled:hover:not(:disabled) { box-shadow: var(--md-sys-elevation-level2); }
+        .btn--filled:active:not(:disabled) { transform: scale(0.98); }
+
+        .btn--tonal { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+        .btn--tonal:hover:not(:disabled) { background: var(--md-sys-color-secondary-container); filter: brightness(1.1); }
+
+        .btn--outlined { background: transparent; color: var(--md-sys-color-primary); border: 1px solid var(--md-sys-color-primary); }
+        .btn--outlined:hover:not(:disabled) { background: var(--md-sys-color-primary-container); }
+
+        .btn--text { background: transparent; color: var(--md-sys-color-primary); padding: 10px 12px; }
+        .btn--text:hover:not(:disabled) { background: var(--md-sys-color-primary-container); }
+
+        .btn--error { background: var(--md-sys-color-error-container); color: var(--md-sys-color-error); }
+        .btn--error:hover:not(:disabled) { filter: brightness(1.1); }
+
+        .btn--icon { padding: 8px; border-radius: 50%; }
+        .btn--icon:hover:not(:disabled) { background: var(--md-sys-color-surface-variant); }
+
+        /* Text field */
+        .text-field {
+            position: relative; width: 100%; min-width: 280px;
+        }
+        .text-field__input {
+            width: 100%; padding: 16px 12px 8px;
+            font: var(--md-sys-typescale-body-large);
+            color: var(--md-sys-color-on-surface);
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-small) var(--md-sys-shape-corner-small) 0 0;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .text-field__input:focus {
+            border-bottom-color: var(--md-sys-color-primary);
+            border-bottom-width: 2px;
+            padding-bottom: 7px;
+        }
+        .text-field__input::placeholder { color: transparent; }
+        .text-field__label {
+            position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+            font: var(--md-sys-typescale-body-large);
+            color: var(--md-sys-color-on-surface-variant);
+            pointer-events: none; transition: all 0.15s ease;
+            background: transparent; padding: 0 4px;
+        }
+        .text-field:focus-within .text-field__label,
+        .text-field__input:not(:placeholder-shown) + .text-field__label {
+            top: 4px; transform: translateY(0) scale(0.75);
+            color: var(--md-sys-color-primary);
+        }
+        .text-field__supporting { display: block; margin-top: 4px; font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); }
+
+        /* Chip / Path item */
+        .chip-set { display: flex; flex-direction: column; gap: 8px; }
+        .chip {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px;
+            background: var(--md-sys-color-surface-variant);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-medium);
+            transition: all 0.15s ease;
+        }
+        .chip:hover { border-color: var(--md-sys-color-outline); }
+        .chip--valid { border-color: var(--md-sys-color-tertiary); background: rgba(125, 82, 96, 0.1); }
+        .chip--invalid { border-color: var(--md-sys-color-error); background: rgba(179, 38, 30, 0.1); }
+        .chip__icon { color: var(--md-sys-color-on-surface-variant); font-size: 24px; }
+        .chip__icon--valid { color: var(--md-sys-color-tertiary); }
+        .chip__icon--invalid { color: var(--md-sys-color-error); }
+        .chip__info { flex: 1; min-width: 0; }
+        .chip__name { font: var(--md-sys-typescale-body-medium); font-weight: 500; color: var(--md-sys-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chip__meta { font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chip__actions { display: flex; gap: 4px; }
+
+        /* Divider */
+        .divider { height: 1px; background: var(--md-sys-color-outline-variant); margin: 8px 0; }
+
+        /* Select */
+        .select-field { position: relative; min-width: 200px; }
+        .select-field__select {
+            width: 100%; appearance: none; padding: 16px 40px 8px 12px;
+            font: var(--md-sys-typescale-body-large); color: var(--md-sys-color-on-surface);
+            background: var(--md-sys-color-surface-variant);
+            border: 1px solid var(--md-sys-color-outline-variant);
+            border-radius: var(--md-sys-shape-corner-small);
+            outline: none; cursor: pointer;
+        }
+        .select-field__select:focus { border-color: var(--md-sys-color-primary); box-shadow: 0 0 0 2px rgba(103, 80, 164, 0.2); }
+        .select-field__icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--md-sys-color-on-surface-variant); pointer-events: none; }
+
+        /* Checkbox */
+        .checkbox-field { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; }
+        .checkbox-field input { position: absolute; opacity: 0; pointer-events: none; }
+        .checkbox-field__box {
+            width: 20px; height: 20px; border: 2px solid var(--md-sys-color-outline); border-radius: 4px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .checkbox-field input:checked + .checkbox-field__box { background: var(--md-sys-color-primary); border-color: var(--md-sys-color-primary); }
+        .checkbox-field__box .material-icons-round { font-size: 16px; color: var(--md-sys-color-on-primary); opacity: 0; transform: scale(0.5); transition: all 0.15s; }
+        .checkbox-field input:checked + .checkbox-field__box .material-icons-round { opacity: 1; transform: scale(1); }
+        .checkbox-field__label { font: var(--md-sys-typescale-body-medium); color: var(--md-sys-color-on-surface); }
+
+        /* Progress */
+        .progress { display: none; }
+        .progress--active { display: block; }
+        .progress__bar { height: 4px; background: var(--md-sys-color-surface-variant); border-radius: var(--md-sys-shape-corner-full); overflow: hidden; margin-bottom: 12px; }
+        .progress__fill { height: 100%; width: 0%; background: var(--md-sys-color-primary); border-radius: inherit; transition: width 0.3s ease; }
+        .progress__label { font: var(--md-sys-typescale-body-medium); color: var(--md-sys-color-on-surface-variant); display: flex; justify-content: space-between; }
+        .progress__spinner { display: none; width: 20px; height: 20px; border: 2px solid var(--md-sys-color-outline-variant); border-top-color: var(--md-sys-color-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        .progress__spinner--active { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Alert */
+        .alert { display: none; padding: 16px; background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); border-radius: var(--md-sys-shape-corner-medium); margin-bottom: 16px; font: var(--md-sys-typescale-body-medium); }
+        .alert--active { display: flex; align-items: center; gap: 12px; }
+        .alert .material-icons-round { font-size: 20px; flex-shrink: 0; }
+
+        /* Table */
+        .table-container { overflow-x: auto; }
+        .table { width: 100%; border-collapse: collapse; font: var(--md-sys-typescale-body-small); }
+        .table th, .table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+        .table th { font: var(--md-sys-typescale-label-large); font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface); position: sticky; top: 0; z-index: 10; }
+        .table tbody tr { transition: background 0.15s; }
+        .table tbody tr:hover { background: var(--md-sys-color-surface-variant); }
+        .table td { color: var(--md-sys-color-on-surface); }
+        .table td:last-child { font-family: 'Roboto Mono', monospace; font-size: 11px; color: var(--md-sys-color-on-surface-variant); }
+
+        .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: var(--md-sys-shape-corner-full); font: var(--md-sys-typescale-label-small); font-weight: 500; }
+        .badge--red { background: rgba(179, 38, 30, 0.2); color: #FFB4AB; }
+        .badge--yellow { background: rgba(102, 81, 0, 0.2); color: #FFD666; }
+        .badge--green { background: rgba(18, 94, 36, 0.2); color: #A8F0B8; }
+        .badge--exact { background: rgba(179, 38, 30, 0.3); color: #FFB4AB; border: 1px solid #FFB4AB; }
+
+        .score { font-family: 'Roboto Mono', monospace; font-weight: 500; }
+        .score--high { color: #FFB4AB; }
+        .score--med { color: #FFD666; }
+        .score--low { color: #A8F0B8; }
+
+        /* Track action buttons */
+        .track-action {
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .track-action.play-btn {
+            color: var(--md-sys-color-primary);
+        }
+        .track-action.play-btn.playing {
+            background: rgba(179, 38, 30, 0.2);
+            color: #FFB4AB;
+        }
+        .track-action.playing .material-icons-round {
+            color: #FFB4AB;
+        }
+        .track-name {
+            margin-left: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Filter chips */
+        .filter-set { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .filter-chip { padding: 8px 16px; border-radius: var(--md-sys-shape-corner-full); font: var(--md-sys-typescale-label-medium); font-weight: 500; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); cursor: pointer; transition: all 0.15s; }
+        .filter-chip:hover { border-color: var(--md-sys-color-outline); }
+        .filter-chip--active { background: var(--md-sys-color-primary-container); border-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary-container); }
+        .filter-chip--red.filter-chip--active { background: rgba(179, 38, 30, 0.2); border-color: #FFB4AB; color: #FFB4AB; }
+        .filter-chip--yellow.filter-chip--active { background: rgba(102, 81, 0, 0.2); border-color: #FFD666; color: #FFD666; }
+        .filter-chip--green.filter-chip--active { background: rgba(18, 94, 36, 0.2); border-color: #A8F0B8; color: #A8F0B8; }
+        .filter-chip--exact.filter-chip--active { background: rgba(125, 82, 96, 0.3); border-color: #E8B4FF; color: #E8B4FF; }
+
+        /* Stats */
+        .stats { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+        .stat { display: flex; align-items: center; gap: 8px; font: var(--md-sys-typescale-body-medium); color: var(--md-sys-color-on-surface); }
+        .stat__dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .stat__dot--red { background: #FFB4AB; }
+        .stat__dot--yellow { background: #FFD666; }
+        .stat__dot--green { background: #A8F0B8; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--md-sys-color-on-surface-variant); }
+        .empty-state .material-icons-round { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state__title { font: var(--md-sys-typescale-title-large); font-weight: 400; margin-bottom: 8px; color: var(--md-sys-color-on-surface); }
+        .empty-state__text { font: var(--md-sys-typescale-body-medium); }
+
+        /* History */
+        .history-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--md-sys-color-surface-variant); border-radius: var(--md-sys-shape-corner-medium); margin-bottom: 8px; }
+        .history-item__info { display: flex; flex-direction: column; gap: 4px; }
+        .history-item__title { font: var(--md-sys-typescale-body-medium); font-weight: 500; color: var(--md-sys-color-on-surface); }
+        .history-item__meta { font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); }
+        .history-item__time { font: var(--md-sys-typescale-body-small); color: var(--md-sys-color-on-surface-variant); font-family: 'Roboto Mono', monospace; margin-left: 16px; }
+
+        /* Dialog */
+        .dialog-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px; }
+        .dialog-backdrop--active { display: flex; }
+        .dialog { background: var(--md-sys-color-surface); border-radius: var(--md-sys-shape-corner-large); max-width: 560px; width: 100%; box-shadow: var(--md-sys-elevation-level3); overflow: hidden; }
+        .dialog__header { padding: 24px 24px 8px; }
+        .dialog__title { font: var(--md-sys-typescale-title-large); font-weight: 500; color: var(--md-sys-color-on-surface); }
+        .dialog__content { padding: 8px 24px 16px; font: var(--md-sys-typescale-body-medium); color: var(--md-sys-color-on-surface-variant); }
+        .dialog__actions { display: flex; justify-content: flex-end; gap: 8px; padding: 8px 24px 16px; border-top: 1px solid var(--md-sys-color-outline-variant); margin-top: 8px; }
+
+        /* Utility */
+        .hidden { display: none !important; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes btnPress {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.85); }
+            100% { transform: scale(1); }
+        }
+        .track-action:active {
+            animation: btnPress 0.15s ease;
+        }
+
+        /* Dark scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--md-sys-color-surface);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--md-sys-color-outline-variant);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--md-sys-color-outline);
+        }
+        ::-webkit-scrollbar-corner {
+            background: var(--md-sys-color-surface);
+        }
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--md-sys-color-outline-variant) var(--md-sys-color-surface);
+        }
+    </style>
+</head>
+<body>
+    <header class="app-bar" role="banner">
+        <span class="material-icons-round">tune</span>
+        <h1 class="app-bar__title">Audio Similarity</h1>
+    </header>
+
+    <main class="container" role="main">
+        <!-- Catalog Paths Section -->
+        <section class="section" aria-labelledby="paths-title">
+            <div class="section__header">
+                <h2 class="section__title" id="paths-title">Каталоги треков</h2>
+            </div>
+
+            <div class="card">
+                <div class="card__content">
+                    <div class="chip-set" id="pathList" role="list" aria-label="Добавленные пути к каталогам"></div>
+
+                    <div class="divider" style="margin: 16px 0;"></div>
+
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+                        <div class="text-field" style="flex: 1; min-width: 300px;">
+                            <input type="text" class="text-field__input" id="newPathInput" placeholder=" " aria-label="Путь к каталогу" autocomplete="off">
+                            <label class="text-field__label" for="newPathInput">Путь к папке с треками (D:\Music или \\server\share)</label>
+                        </div>
+                        <button class="btn btn--filled" id="addPathBtn" aria-label="Добавить путь">
+                            <span class="material-icons-round">add</span> Добавить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Job Runner Section -->
+        <section class="section" aria-labelledby="run-title">
+            <div class="section__header">
+                <h2 class="section__title" id="run-title">Запуск проверки</h2>
+            </div>
+
+            <div class="card">
+                <div class="card__content">
+                    <div class="alert" id="errorBox" role="alert" aria-live="assertive">
+                        <span class="material-icons-round">error</span>
+                        <span id="errorText"></span>
+                    </div>
+
+                    <p style="font: var(--md-sys-typescale-body-medium); color: var(--md-sys-color-on-surface-variant); margin-bottom: 16px;">
+                        Сравнит все треки в выбранных папках между собой и найдёт похожие/дубликаты.
+                    </p>
+
+                    <button class="btn btn--filled" id="startJobBtn" style="width: 100%; justify-content: center;">
+                        <span class="material-icons-round">search</span> Найти похожие треки
+                    </button>
+
+                    <div class="progress" id="progressContainer" role="status" aria-live="polite">
+                        <div class="progress__bar"><div class="progress__fill" id="progressFill"></div></div>
+                        <div class="progress__label">
+                            <span id="progressText">Подготовка...</span>
+                            <span class="progress__spinner progress__spinner--active" aria-hidden="true"></span>
+                        </div>
+                    </div>
+
+                    <div class="results-container hidden" id="resultsContainer">
+                        <div class="filter-set" role="group" aria-label="Фильтр по уровню">
+                            <button class="filter-chip filter-chip--active" data-filter="all" aria-pressed="true">Все</button>
+                            <button class="filter-chip filter-chip--exact" data-filter="EXACT" aria-pressed="false"><span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-right:4px;">content_copy</span> EXACT</button>
+                            <button class="filter-chip filter-chip--red" data-filter="RED" aria-pressed="false"><span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-right:4px;">circle</span> RED</button>
+                            <button class="filter-chip filter-chip--yellow" data-filter="YELLOW" aria-pressed="false"><span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-right:4px;">circle</span> YELLOW</button>
+                            <button class="filter-chip filter-chip--green" data-filter="GREEN" aria-pressed="false"><span class="material-icons-round" style="font-size:16px;vertical-align:middle;margin-right:4px;">circle</span> GREEN</button>
+                        </div>
+
+                        <div class="stats" id="stats" aria-live="polite"></div>
+
+                        <div class="table-container">
+                            <table class="table" id="resultsTable" role="grid">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Уровень</th>
+                                        <th scope="col">Сходство</th>
+                                        <th scope="col">Chroma</th>
+                                        <th scope="col">Темп</th>
+                                        <th scope="col">Трек А</th>
+                                        <th scope="col">Трек Б</th>
+                                        <th scope="col">Действия</th>
+                                        <th scope="col">Сегменты</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+
+                        <div class="empty-state hidden" id="emptyResults">
+                            <span class="material-icons-round">search_off</span>
+                            <div class="empty-state__title">Нет результатов</div>
+                            <div class="empty-state__text">Результаты появятся здесь после завершения анализа</div>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+                            <button class="btn btn--tonal" id="exportCsvBtn">
+                                <span class="material-icons-round">download</span> CSV
+                            </button>
+                            <button class="btn btn--tonal" id="exportJsonBtn">
+                                <span class="material-icons-round">download</span> JSON
+                            </button>
+                            <button class="btn btn--outlined" id="openOutputBtn" style="margin-left: auto;">
+                                <span class="material-icons-round">folder_open</span> Открыть папку с отчётами
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section class="section" aria-labelledby="history-title">
+            <div class="section__header">
+                <h2 class="section__title" id="history-title">История запусков</h2>
+            </div>
+
+            <div class="card">
+                <div class="card__content">
+                    <div id="historyList">
+                        <div class="empty-state">
+                            <span class="material-icons-round">history</span>
+                            <div class="empty-state__title">История пуста</div>
+                            <div class="empty-state__text">Запуски будут отображаться здесь</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Confirm dialog -->
+    <div class="dialog-backdrop" id="confirmDialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div class="dialog">
+            <div class="dialog__header"><h3 class="dialog__title" id="confirmTitle">Подтверждение</h3></div>
+            <div class="dialog__content" id="confirmText"></div>
+            <div class="dialog__actions">
+                <button class="btn btn--text" id="confirmCancel">Отмена</button>
+                <button class="btn btn--filled" id="confirmOk">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentJobId = null;
+        let eventSource = null;
+        let allResults = [];
+        let pathToDelete = null;
+
+        // Initialize Material-like behavior
+        function initTextFields() {
+            document.querySelectorAll('.text-field__input').forEach(input => {
+                // Set placeholder to space to enable floating label
+                input.placeholder = ' ';
+                input.addEventListener('blur', () => {
+                    if (!input.value) input.placeholder = ' ';
+                });
+            });
+        }
+
+        // Path management
+        async function loadPaths() {
+            try {
+                const res = await fetch('/api/paths');
+                const data = await res.json();
+                data.paths.forEach(p => addPathToList(p, true));
+            } catch (e) {
+                console.error('Failed to load paths:', e);
+            }
+        }
+
+        function addPathToList(path, saved = false) {
+            const list = document.getElementById('pathList');
+            const item = document.createElement('div');
+            item.className = 'chip';
+            item.dataset.path = path;
+            item.setAttribute('role', 'listitem');
+
+            const safeId = path.replace(/[^a-zA-Z0-9]/g, '_');
+            const jsPath = escapeJs(path);
+            item.innerHTML = `
+                <span class="material-icons-round chip__icon" aria-hidden="true">folder</span>
+                <div class="chip__info">
+                    <div class="chip__name" title="${escapeHtml(path)}">${escapeHtml(path)}</div>
+                    <div class="chip__meta" id="meta-${safeId}">Проверка...</div>
+                </div>
+                <div class="chip__actions">
+                    <button class="btn btn--icon btn--text" onclick="scanPath('${jsPath}', this)" aria-label="Сканировать путь">
+                        <span class="material-icons-round">refresh</span>
+                    </button>
+                    <button class="btn btn--icon btn--text" onclick="confirmDeletePath(this)" aria-label="Удалить путь">
+                        <span class="material-icons-round">delete</span>
+                    </button>
+                </div>
+            `;
+            list.appendChild(item);
+
+            if (!saved) savePaths();
+            scanPath(path, item);
+        }
+
+        async function scanPath(path, item = null) {
+            try {
+                const res = await fetch('/api/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ path })
+                });
+                const data = await res.json();
+
+                const safeId = path.replace(/[^a-zA-Z0-9]/g, '_');
+                const metaEl = document.getElementById(`meta-${safeId}`);
+                const iconEl = item?.querySelector('.chip__icon');
+
+                if (metaEl) {
+                    if (data.exists) {
+                        metaEl.textContent = `${data.file_count} файлов (${Array.from(data.extensions).join(', ')})`;
+                        item?.classList.add('chip--valid');
+                        item?.classList.remove('chip--invalid');
+                        if (iconEl) { iconEl.textContent = 'folder'; iconEl.classList.add('chip__icon--valid'); iconEl.classList.remove('chip__icon--invalid'); }
+                    } else {
+                        metaEl.textContent = `Ошибка: ${data.error}`;
+                        item?.classList.add('chip--invalid');
+                        item?.classList.remove('chip--valid');
+                        if (iconEl) { iconEl.textContent = 'error'; iconEl.classList.add('chip__icon--invalid'); iconEl.classList.remove('chip__icon--valid'); }
+                    }
+                }
+                return data;
+            } catch (e) {
+                console.error('Scan failed:', e);
+            }
+        }
+
+        function addPath() {
+            const input = document.getElementById('newPathInput');
+            const path = input.value.trim();
+            if (!path) return;
+            addPathToList(path);
+            input.value = '';
+            input.placeholder = ' ';
+            input.blur();
+        }
+
+        function confirmDeletePath(btn) {
+            const item = btn.closest('.chip');
+            pathToDelete = item;
+            document.getElementById('confirmTitle').textContent = 'Удалить путь?';
+            document.getElementById('confirmText').textContent = `Удалить "${item.dataset.path}" из списка?`;
+            document.getElementById('confirmDialog').classList.add('dialog-backdrop--active');
+            document.getElementById('confirmOk').focus();
+        }
+
+        function deletePath() {
+            if (pathToDelete) {
+                pathToDelete.remove();
+                savePaths();
+                pathToDelete = null;
+            }
+            closeDialog();
+        }
+
+        function closeDialog() {
+            document.getElementById('confirmDialog').classList.remove('dialog-backdrop--active');
+        }
+
+        async function savePaths() {
+            const items = document.querySelectorAll('.chip[data-path]');
+            const paths = Array.from(items).map(el => el.dataset.path);
+            try {
+                await fetch('/api/paths', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paths })
+                });
+            } catch (e) {
+                console.error('Save paths failed:', e);
+            }
+        }
+
+        // Mode toggle
+        function toggleMode() {
+            const mode = document.getElementById('modeSelect').value;
+            document.getElementById('newTrackRow').style.display = mode === 'new_track' ? 'flex' : 'none';
+        }
+
+        // Job management
+        async function startJob() {
+            const pathItems = document.querySelectorAll('.chip[data-path]');
+            if (pathItems.length === 0) {
+                showError('Добавьте хотя бы одну папку');
+                return;
+            }
+
+            const catalogPaths = Array.from(pathItems).map(el => el.dataset.path);
+
+            hideError();
+            document.getElementById('progressContainer').classList.add('progress--active');
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('emptyResults').classList.add('hidden');
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = 'Сканирование...';
+            document.getElementById('startJobBtn').disabled = true;
+
+            try {
+                const res = await fetch('/api/jobs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        catalog_paths: catalogPaths,
+                        rebuild_all: true
+                    })
+                });
+
+                const data = await res.json();
+                if (data.error) {
+                    showError(data.error);
+                    resetProgress();
+                    return;
+                }
+
+                currentJobId = data.job_id;
+                connectSSE(currentJobId);
+            } catch (e) {
+                showError('Ошибка запуска: ' + e.message);
+                resetProgress();
+            }
+        }
+
+        function resetProgress() {
+            document.getElementById('progressContainer').classList.remove('progress--active');
+            document.getElementById('startJobBtn').disabled = false;
+        }
+
+        function connectSSE(jobId) {
+            if (eventSource) eventSource.close();
+
+            eventSource = new EventSource(`/api/jobs/${jobId}/events`);
+            eventSource.onmessage = (e) => {
+                try {
+                    const job = JSON.parse(e.data);
+                    updateProgress(job);
+                } catch (err) {
+                    console.error('SSE parse error:', err);
+                }
+            };
+            eventSource.onerror = () => {
+                eventSource.close();
+            };
+        }
+
+        function updateProgress(job) {
+            document.getElementById('progressFill').style.width = `${job.progress}%`;
+            document.getElementById('progressText').textContent = job.message;
+
+            if (job.status === 'completed') {
+                eventSource.close();
+                loadResults(job.job_id);
+            } else if (job.status === 'failed') {
+                eventSource.close();
+                showError(job.error || 'Неизвестная ошибка');
+                resetProgress();
+            }
+        }
+
+        async function loadResults(jobId) {
+            try {
+                const res = await fetch(`/api/jobs/${jobId}/results`);
+                const data = await res.json();
+
+                if (data.error) {
+                    showError(data.error);
+                    resetProgress();
+                    return;
+                }
+
+                allResults = data.results || [];
+                renderResults(allResults);
+                renderStats(allResults, data.thresholds);
+                document.getElementById('resultsContainer').classList.remove('hidden');
+                document.getElementById('emptyResults').classList.toggle('hidden', allResults.length > 0);
+                document.querySelector('#resultsTable tbody').classList.toggle('hidden', allResults.length === 0);
+                resetProgress();
+                addToHistory(jobId, data);
+            } catch (e) {
+                showError('Ошибка загрузки результатов: ' + e.message);
+                resetProgress();
+            }
+        }
+
+        function renderResults(results) {
+            const tbody = document.querySelector('#resultsTable tbody');
+            tbody.innerHTML = '';
+
+            const currentFilter = document.querySelector('.filter-chip--active')?.dataset.filter || 'all';
+
+            results.forEach(r => {
+                if (currentFilter !== 'all' && r.classification !== currentFilter) return;
+
+                const tr = document.createElement('tr');
+                tr.dataset.level = r.classification;
+                tr.dataset.trackA = r.track_a;
+                tr.dataset.trackB = r.track_b;
+
+                const scoreClass = r.fused_similarity >= 0.95 ? 'high' : r.fused_similarity >= 0.85 ? 'med' : 'low';
+                const badgeClass = r.classification.toLowerCase();
+
+                tr.innerHTML = `
+                    <td><span class="badge badge--${badgeClass}">${r.classification}</span></td>
+                    <td class="score score--${scoreClass}">${r.fused_similarity.toFixed(3)}</td>
+                    <td>${r.chroma_similarity.toFixed(3)}</td>
+                    <td>${r.tempo_ratio.toFixed(3)}</td>
+                    <td style="font-weight: 500; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(r.track_a)}">
+                        <button class="btn btn--icon btn--text track-action play-btn" data-action="play" data-track="${escapeJs(r.track_a)}" data-playing="false" title="Воспроизвести" aria-label="Воспроизвести ${escapeHtml(r.track_a)}">
+                            <span class="material-icons-round">play_arrow</span>
+                        </button>
+                        <button class="btn btn--icon btn--text track-action" data-action="folder" data-track="${escapeJs(r.track_a)}" title="Открыть папку" aria-label="Открыть папку с ${escapeHtml(r.track_a)}">
+                            <span class="material-icons-round">folder_open</span>
+                        </button>
+                        <span class="track-name">${escapeHtml(r.track_a)}</span>
+                    </td>
+                    <td style="font-weight: 500; max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(r.track_b)}">
+                        <button class="btn btn--icon btn--text track-action play-btn" data-action="play" data-track="${escapeJs(r.track_b)}" data-playing="false" title="Воспроизвести" aria-label="Воспроизвести ${escapeHtml(r.track_b)}">
+                            <span class="material-icons-round">play_arrow</span>
+                        </button>
+                        <button class="btn btn--icon btn--text track-action" data-action="folder" data-track="${escapeJs(r.track_b)}" title="Открыть папку" aria-label="Открыть папку с ${escapeHtml(r.track_b)}">
+                            <span class="material-icons-round">folder_open</span>
+                        </button>
+                        <span class="track-name">${escapeHtml(r.track_b)}</span>
+                    </td>
+                    <td>
+                        <button class="btn btn--icon btn--text track-action" data-action="play-both" data-track-a="${escapeJs(r.track_a)}" data-track-b="${escapeJs(r.track_b)}" title="Сравнить (по очереди)" aria-label="Сравнить ${escapeHtml(r.track_a)} и ${escapeHtml(r.track_b)}">
+                            <span class="material-icons-round">compare_arrows</span>
+                        </button>
+                    </td>
+                    <td>${r.segment_pair ? `${r.segment_pair[0]}-${r.segment_pair[1]}` : '—'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderStats(results, thresholds) {
+            const exact = results.filter(r => r.classification === 'EXACT').length;
+            const red = results.filter(r => r.classification === 'RED').length;
+            const yellow = results.filter(r => r.classification === 'YELLOW').length;
+            const green = results.filter(r => r.classification === 'GREEN').length;
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat"><span class="stat__dot" style="background:#E8B4FF"></span> EXACT: ${exact}</div>
+                <div class="stat"><span class="stat__dot stat__dot--red"></span> RED: ${red}</div>
+                <div class="stat"><span class="stat__dot stat__dot--yellow"></span> YELLOW: ${yellow}</div>
+                <div class="stat"><span class="stat__dot stat__dot--green"></span> GREEN: ${green}</div>
+                ${thresholds ? `
+                <div class="stat">Порог RED: ${thresholds.red?.toFixed(3) || '—'}</div>
+                <div class="stat">Порог YELLOW: ${thresholds.yellow?.toFixed(3) || '—'}</div>
+                ` : ''}
+            `;
+        }
+
+        function filterResults(level) {
+            document.querySelectorAll('.filter-chip').forEach(btn => {
+                btn.classList.remove('filter-chip--active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            const activeBtn = document.querySelector(`.filter-chip[data-filter="${level}"]`);
+            activeBtn?.classList.add('filter-chip--active');
+            activeBtn?.setAttribute('aria-pressed', 'true');
+
+            const rows = document.querySelectorAll('#resultsTable tbody tr');
+            rows.forEach(row => {
+                row.style.display = (level === 'all' || row.dataset.level === level) ? '' : 'none';
+            });
+        }
+
+        async function exportCSV() {
+            if (!currentJobId) return;
+            window.location.href = `/api/jobs/${currentJobId}/export`;
+        }
+
+        async function exportJSON() {
+            if (!currentJobId) return;
+            try {
+                const res = await fetch(`/api/jobs/${currentJobId}/results`);
+                const data = await res.json();
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `similarity_report_${currentJobId}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                showError('Экспорт JSON не удался: ' + e.message);
+            }
+        }
+
+        function addToHistory(jobId, data) {
+            const list = document.getElementById('historyList');
+            const emptyState = list.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            const date = new Date().toLocaleDateString('ru-RU');
+            const mode = data.mode === 'new_track' ? 'Новый трек' : 'Пересборка';
+            const track = data.new_track ? data.new_track.split(/[\\/]/).pop() : '—';
+            item.innerHTML = `
+                <div class="history-item__info">
+                    <span class="history-item__title">${mode}: ${escapeHtml(track)}</span>
+                    <span class="history-item__meta">${data.catalog_size || data.results?.length || 0} треков • ${data.results?.length || 0} сравнений</span>
+                </div>
+                <span class="history-item__time">${date} ${time}</span>
+            `;
+            list.insertBefore(item, list.firstChild);
+        }
+
+        function showError(msg) {
+            const box = document.getElementById('errorBox');
+            document.getElementById('errorText').textContent = msg;
+            box.classList.add('alert--active');
+        }
+
+        function hideError() {
+            document.getElementById('errorBox').classList.remove('alert--active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeJs(text) {
+            return text.replace(/[\\"']/g, '\\$&').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+        }
+
+        // Event listeners
+        document.getElementById('addPathBtn').addEventListener('click', addPath);
+        document.getElementById('newPathInput').addEventListener('keydown', e => { if (e.key === 'Enter') addPath(); });
+        document.getElementById('startJobBtn').addEventListener('click', startJob);
+        document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+        document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
+        document.getElementById('openOutputBtn').addEventListener('click', openOutputFolder);
+        document.getElementById('confirmOk').addEventListener('click', deletePath);
+        document.getElementById('confirmCancel').addEventListener('click', closeDialog);
+        document.getElementById('confirmDialog').addEventListener('click', e => { if (e.target === e.currentTarget) closeDialog(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDialog(); });
+
+        document.querySelectorAll('.filter-chip').forEach(btn => {
+            btn.addEventListener('click', () => filterResults(btn.dataset.filter));
+        });
+
+        // Track action handlers (play, folder, compare)
+        let currentAudio = null;
+        let currentPlayingBtn = null;
+
+        document.getElementById('resultsTable').addEventListener('click', async (e) => {
+            const btn = e.target.closest('.track-action');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+            const track = btn.dataset.track;
+            const trackA = btn.dataset.trackA;
+            const trackB = btn.dataset.trackB;
+
+            try {
+                if (action === 'play') {
+                    await togglePlay(btn, track);
+                } else if (action === 'folder') {
+                    await openFolder(track);
+                } else if (action === 'play-both') {
+                    await playBoth(trackA, trackB);
+                }
+            } catch (err) {
+                console.error('Track action failed:', err);
+                showError('Ошибка: ' + err.message);
+            }
+        });
+
+        async function togglePlay(btn, trackName) {
+            const isPlaying = btn.dataset.playing === 'true';
+            const icon = btn.querySelector('.material-icons-round');
+
+            if (isPlaying) {
+                // Stop
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+                btn.dataset.playing = 'false';
+                icon.textContent = 'play_arrow';
+                btn.classList.remove('playing');
+                if (currentPlayingBtn === btn) currentPlayingBtn = null;
+            } else {
+                // Stop any currently playing
+                if (currentAudio) {
+                    currentAudio.pause();
+                    if (currentPlayingBtn) {
+                        currentPlayingBtn.dataset.playing = 'false';
+                        currentPlayingBtn.querySelector('.material-icons-round').textContent = 'play_arrow';
+                        currentPlayingBtn.classList.remove('playing');
+                    }
+                }
+
+                try {
+                    const res = await fetch(`/api/audio/${encodeURIComponent(trackName)}`);
+                    if (!res.ok) throw new Error('Файл не найден');
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    currentAudio = new Audio(url);
+                    currentAudio.play();
+                    currentAudio.onended = () => {
+                        URL.revokeObjectURL(url);
+                        currentAudio = null;
+                        btn.dataset.playing = 'false';
+                        icon.textContent = 'play_arrow';
+                        btn.classList.remove('playing');
+                        if (currentPlayingBtn === btn) currentPlayingBtn = null;
+                    };
+                    btn.dataset.playing = 'true';
+                    icon.textContent = 'stop';
+                    btn.classList.add('playing');
+                    currentPlayingBtn = btn;
+                } catch (err) {
+                    showError('Не удалось воспроизвести: ' + err.message);
+                }
+            }
+        }
+
+        async function playBoth(trackA, trackB) {
+            if (currentAudio) {
+                currentAudio.pause();
+                if (currentPlayingBtn) {
+                    currentPlayingBtn.dataset.playing = 'false';
+                    currentPlayingBtn.querySelector('.material-icons-round').textContent = 'play_arrow';
+                    currentPlayingBtn.classList.remove('playing');
+                }
+                currentAudio = null;
+                currentPlayingBtn = null;
+            }
+            const playSeq = async (name) => {
+                const res = await fetch(`/api/audio/${encodeURIComponent(name)}`);
+                if (!res.ok) throw new Error('Файл не найден: ' + name);
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                return new Promise((resolve) => {
+                    audio.onended = () => { URL.revokeObjectURL(url); resolve(); };
+                    audio.play();
+                });
+            };
+            try {
+                await playSeq(trackA);
+                await playSeq(trackB);
+            } catch (err) {
+                showError('Ошибка воспроизведения: ' + err.message);
+            }
+        }
+
+        async function openFolder(trackName) {
+            try {
+                const res = await fetch(`/api/open-folder/${encodeURIComponent(trackName)}`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showError(`📂 Открыта папка: ${data.path}`);
+                } else {
+                    showError('Ошибка: ' + (data.error || 'Не удалось открыть'));
+                }
+} catch (err) {
+            showError('Ошибка: ' + err.message);
+        }
+    }
+
+        async function openOutputFolder() {
+            try {
+                const res = await fetch('/api/open-output', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    showError(`📂 Открыта папка: ${data.path}`);
+                } else {
+                    showError('Ошибка: ' + (data.error || 'Не удалось открыть'));
+                }
+            } catch (err) {
+                showError('Ошибка: ' + err.message);
+            }
+        }
+
+        </script>
+</body>
+</html>

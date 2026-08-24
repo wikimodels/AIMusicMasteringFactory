@@ -1,0 +1,394 @@
+[
+  {
+    "track_a": "В_темноте - Copy.m4a",
+    "track_b": "В_темноте.m4a",
+    "fused_similarity": 1.0,
+    "chroma_similarity": 1.0,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      0,
+      0
+    ],
+    "classification": "EXACT",
+    "red_threshold": 0.0,
+    "yellow_threshold": 0.0
+  },
+  {
+    "track_a": "гавнецо.m4a",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 1.0,
+    "chroma_similarity": 1.0,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      0,
+      0
+    ],
+    "classification": "EXACT",
+    "red_threshold": 0.0,
+    "yellow_threshold": 0.0
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "В_темноте - Copy.m4a",
+    "fused_similarity": 0.8897568583488464,
+    "chroma_similarity": 0.9782595634460449,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      3,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "В_темноте.m4a",
+    "fused_similarity": 0.8897568583488464,
+    "chroma_similarity": 0.9782595634460449,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      3,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "tochka_k_-_Приём_Феникса.m4a",
+    "track_b": "гавнецо.m4a",
+    "fused_similarity": 0.8678905367851257,
+    "chroma_similarity": 0.9673251509666443,
+    "tempo_ratio": 0.9310345184948979,
+    "segment_pair": [
+      1,
+      3
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "tochka_k_-_Приём_Феникса.m4a",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 0.8678905367851257,
+    "chroma_similarity": 0.9673251509666443,
+    "tempo_ratio": 0.9310345184948979,
+    "segment_pair": [
+      1,
+      3
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "House_of_Dragon_S02_E01_1.mp3",
+    "fused_similarity": 0.8602147698402405,
+    "chroma_similarity": 0.9856563806533813,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      0,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "tochka_k_-_Приём_Феникса.m4a",
+    "track_b": "В_темноте - Copy.m4a",
+    "fused_similarity": 0.823561429977417,
+    "chroma_similarity": 0.947456955909729,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      1,
+      3
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "tochka_k_-_Приём_Феникса.m4a",
+    "track_b": "В_темноте.m4a",
+    "fused_similarity": 0.823561429977417,
+    "chroma_similarity": 0.947456955909729,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      1,
+      3
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "House_of_Dragon_S02_E01_1.mp3",
+    "track_b": "В_темноте - Copy.m4a",
+    "fused_similarity": 0.8233216404914856,
+    "chroma_similarity": 0.9656674861907959,
+    "tempo_ratio": 0.904761915447396,
+    "segment_pair": [
+      3,
+      3
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "House_of_Dragon_S02_E01_1.mp3",
+    "track_b": "В_темноте.m4a",
+    "fused_similarity": 0.8233216404914856,
+    "chroma_similarity": 0.9656674861907959,
+    "tempo_ratio": 0.904761915447396,
+    "segment_pair": [
+      3,
+      3
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "House_of_Dragon_S02_E01_1.mp3",
+    "track_b": "Woodkid_-_Ghost_Lights.m4a",
+    "fused_similarity": 0.7909070253372192,
+    "chroma_similarity": 0.9664961099624634,
+    "tempo_ratio": 0.904761915447396,
+    "segment_pair": [
+      0,
+      0
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "В_темноте - Copy.m4a",
+    "track_b": "гавнецо.m4a",
+    "fused_similarity": 0.7851211428642273,
+    "chroma_similarity": 0.98554527759552,
+    "tempo_ratio": 0.724137958829365,
+    "segment_pair": [
+      3,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "В_темноте - Copy.m4a",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 0.7851211428642273,
+    "chroma_similarity": 0.98554527759552,
+    "tempo_ratio": 0.724137958829365,
+    "segment_pair": [
+      3,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "В_темноте.m4a",
+    "track_b": "гавнецо.m4a",
+    "fused_similarity": 0.7851211428642273,
+    "chroma_similarity": 0.98554527759552,
+    "tempo_ratio": 0.724137958829365,
+    "segment_pair": [
+      3,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "В_темноте.m4a",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 0.7851211428642273,
+    "chroma_similarity": 0.98554527759552,
+    "tempo_ratio": 0.724137958829365,
+    "segment_pair": [
+      3,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "tochka_k_-_Приём_Феникса.m4a",
+    "track_b": "Woodkid_-_Ghost_Lights.m4a",
+    "fused_similarity": 0.7649154663085938,
+    "chroma_similarity": 0.9784785509109497,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      0,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "гавнецо.m4a",
+    "fused_similarity": 0.7562217116355896,
+    "chroma_similarity": 0.9898812174797058,
+    "tempo_ratio": 0.7894736748866213,
+    "segment_pair": [
+      3,
+      2
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 0.7562217116355896,
+    "chroma_similarity": 0.9898812174797058,
+    "tempo_ratio": 0.7894736748866213,
+    "segment_pair": [
+      3,
+      2
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "tochka_k_-_Приём_Феникса.m4a",
+    "fused_similarity": 0.7529564499855042,
+    "chroma_similarity": 0.9637928605079651,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      3,
+      1
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "House_of_Dragon_S02_E01_1.mp3",
+    "track_b": "tochka_k_-_Приём_Феникса.m4a",
+    "fused_similarity": 0.7325688004493713,
+    "chroma_similarity": 0.9745895862579346,
+    "tempo_ratio": 0.904761915447396,
+    "segment_pair": [
+      1,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Woodkid_-_Ghost_Lights.m4a",
+    "track_b": "гавнецо.m4a",
+    "fused_similarity": 0.7258158326148987,
+    "chroma_similarity": 0.9864845871925354,
+    "tempo_ratio": 0.724137958829365,
+    "segment_pair": [
+      1,
+      1
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Woodkid_-_Ghost_Lights.m4a",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 0.7258158326148987,
+    "chroma_similarity": 0.9864845871925354,
+    "tempo_ratio": 0.724137958829365,
+    "segment_pair": [
+      1,
+      1
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Woodkid_-_Ghost_Lights.m4a",
+    "track_b": "В_темноте - Copy.m4a",
+    "fused_similarity": 0.7008063793182373,
+    "chroma_similarity": 0.9873821139335632,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      1,
+      2
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Woodkid_-_Ghost_Lights.m4a",
+    "track_b": "В_темноте.m4a",
+    "fused_similarity": 0.7008063793182373,
+    "chroma_similarity": 0.9873821139335632,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      1,
+      2
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "Afro_Shev,_Marshal_Soul_-_Mutter.m4a",
+    "track_b": "Woodkid_-_Ghost_Lights.m4a",
+    "fused_similarity": 0.68815016746521,
+    "chroma_similarity": 0.9861938953399658,
+    "tempo_ratio": 1.0,
+    "segment_pair": [
+      2,
+      1
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "House_of_Dragon_S02_E01_1.mp3",
+    "track_b": "гавнецо.m4a",
+    "fused_similarity": 0.6742790341377258,
+    "chroma_similarity": 0.9654110074043274,
+    "tempo_ratio": 0.7894736748866213,
+    "segment_pair": [
+      1,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  },
+  {
+    "track_a": "House_of_Dragon_S02_E01_1.mp3",
+    "track_b": "Тропы_не_врут,_ДМЦ,_Plotnik82_-_Мой_андеграунд - Copy.m4a",
+    "fused_similarity": 0.6742790341377258,
+    "chroma_similarity": 0.9654110074043274,
+    "tempo_ratio": 0.7894736748866213,
+    "segment_pair": [
+      1,
+      4
+    ],
+    "classification": "GREEN",
+    "red_threshold": 1.0470356941223145,
+    "yellow_threshold": 0.9629464149475098
+  }
+]
