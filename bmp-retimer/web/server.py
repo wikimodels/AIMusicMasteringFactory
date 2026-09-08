@@ -41,10 +41,12 @@ for p in (str(BASE), str(REPO_ROOT)):
 from retimer import (  # noqa: E402
     AUDIO_EXTS,
     FFMPEG_FMT,
+    apply_freq_trim_wav,
     convert_wav,
     detect_bpm_file,
     final_bpm_for_track,
     output_name,
+    output_name_rate,
     scan_inputs,
     stretch_backend,
     stretch_to_wav,
@@ -92,9 +94,11 @@ DEFAULTS = {
     "input": str(NEW_DEFAULT_INPUT),
     "output": str(NEW_DEFAULT_OUTPUT),
     "target_bpm": 40.0,
-    "spread": 2.0,
-    "formats": ["wav"],
+    "spread": 1.0,
+    "formats": ["wav", "mp3", "m4a", "ogg"],
     "workers": 4,
+    "low_cut": 30.0,
+    "high_cut": 3000.0,
 }
 
 STATUSES = ("queued", "detecting", "stretching", "saving", "done", "error")
@@ -160,6 +164,10 @@ class Store:
                 self.config["formats"] = fmts or ["wav"]
             if "workers" in patch:
                 self.config["workers"] = max(1, min(16, int(patch["workers"])))
+            if "low_cut" in patch:
+                self.config["low_cut"] = max(0.0, min(1000.0, float(patch["low_cut"])))
+            if "high_cut" in patch:
+                self.config["high_cut"] = max(0.0, min(22000.0, float(patch["high_cut"])))
             CONFIG_FILE.write_text(
                 json.dumps(self.config, indent=2, ensure_ascii=False), encoding="utf-8")
             snapshot = dict(self.config)
@@ -181,16 +189,18 @@ class Store:
                 rel = p.name
             prev = old.get(rel, {})
             dur = _audio_duration(p)
+            # preserve BPM if already analyzed — so trim doesn't wipe it, but initial load has none
+            has_prev = rel in old
             files.append({
                 "id": rel,
                 "rel": rel,
                 "name": p.name,
                 "size": p.stat().st_size,
-                "status": prev.get("status", "queued") if prev.get("status") != "detecting" else "queued",
-                "source_bpm": prev.get("source_bpm"),
-                "manual": bool(prev.get("manual", False)),
-                "final_bpm": prev.get("final_bpm"),
-                "progress": 0.0 if prev.get("status") not in ("done",) else 1.0,
+                "status": prev.get("status", "queued") if has_prev and prev.get("status") != "detecting" else "queued",
+                "source_bpm": prev.get("source_bpm") if has_prev else None,
+                "manual": bool(prev.get("manual", False)) if has_prev else False,
+                "final_bpm": prev.get("final_bpm") if has_prev else None,
+                "progress": prev.get("progress", 0.0) if has_prev else 0.0,
                 "error": None,
                 "duration": dur,
                 "duration_str": _fmt_duration(dur),
@@ -221,11 +231,15 @@ class Store:
             # try parse BPM from filename like name_40bpm.wav
             m = re.search(r"_(\d+)bpm", p.stem, re.I)
             bpm = int(m.group(1)) if m else None
+            # or rate suffix like name_1.5x.wav (no analysis)
+            rm = re.search(r"_(\d+(?:\.\d+)?)x", p.stem, re.I)
+            rate_tag = (rm.group(1) + "x") if rm and bpm is None else None
             outs.append({
                 "rel": rel,
                 "name": p.name,
                 "size": p.stat().st_size,
                 "bpm": bpm,
+                "rate_tag": rate_tag,
                 "duration": dur,
                 "duration_str": _fmt_duration(dur),
                 "audio_url": f"/audio/output/{rel}",
@@ -243,8 +257,23 @@ class Store:
             files = [dict(f) for f in self.files]
             outs = [dict(o) for o in self.outputs]
             done = sum(1 for f in files if f["status"] == "done")
+            analyzed = sum(1 for f in files if f.get("source_bpm") is not None)
             erro = sum(1 for f in files if f["status"] == "error")
-            prog = (sum(f["progress"] for f in files) / len(files)) if files else 0.0
+            # progress: smooth for detect via file progress, else done/analyzed
+            if self.phase == "detect":
+                prog = (sum(f["progress"] for f in files) / len(files)) if files else 0.0
+                # ensure at least analyzed/total visible
+                if files and analyzed == len(files):
+                    prog = 1.0
+            elif self.phase == "process":
+                prog = (done / len(files)) if files else 0.0
+            else:
+                if files and analyzed == len(files):
+                    prog = 1.0
+                elif files and analyzed>0:
+                    prog = analyzed / len(files)
+                else:
+                    prog = (sum(f["progress"] for f in files) / len(files)) if files else 0.0
             return {
                 "config": dict(self.config),
                 "files": files,
@@ -253,6 +282,7 @@ class Store:
                 "phase": self.phase,
                 "total": len(files),
                 "done": done,
+                "analyzed": analyzed,
                 "errors_count": erro,
                 "progress": round(prog, 4),
                 "backend": self.backend,
@@ -318,14 +348,25 @@ class Store:
         if not row:
             return
         src = Path(self.config["input"]) / row["rel"]
-        self._set(fid, status="detecting", progress=0.05, error=None)
+        self._set(fid, status="detecting", progress=0.5, error=None)
         try:
             bpm = detect_bpm_file(src)
             self._set(fid, status="queued", source_bpm=round(bpm, 2),
-                      progress=0.15, manual=False)
+                      progress=1.0, manual=False)
         except Exception as exc:  # noqa: BLE001
             self._set(fid, status="error", progress=0.0, error=f"detect: {exc}")
             self.log_error(fid, "detect", str(exc))
+
+    def clear_bpm(self):
+        with self.lock:
+            for f in self.files:
+                f["source_bpm"] = None
+                f["manual"] = False
+                f["progress"] = 0.0
+                if f["status"] not in ("error", "detecting"):
+                    f["status"] = "queued"
+                f["error"] = None
+        return {"ok": True}
 
     def start_process(self) -> dict:
         with self.lock:
@@ -376,22 +417,95 @@ class Store:
         cfg = dict(self.config)
         src = Path(cfg["input"]) / row["rel"]
         final = final_bpm_for_track(cfg["target_bpm"], cfg["spread"])
-        self._set(fid, status="stretching", final_bpm=round(final, 2), progress=0.25)
+        self._process_one_custom(fid, row, src, final, high_cut=0)
+
+    def _process_one_custom(self, fid: str, row: dict, src: Path,
+                            rate: float, final_bpm: float | None,
+                            low_cut: float = 0, high_cut: float = 0):
+        """Per-card processing: rate-based stretch + optional freq trim.
+
+        Source BPM is NOT required: without it we stretch purely by rate
+        (ratio = 1/rate) and name the file <stem>_<rate>x.
+        """
+        cfg = dict(self.config)
+        self._set(fid, status="stretching",
+                  final_bpm=round(final_bpm, 2) if final_bpm else None,
+                  progress=0.25)
         try:
             with tempfile.TemporaryDirectory() as td:
                 stretched = Path(td) / "stretched.wav"
-                info = stretch_to_wav(src, stretched, row["source_bpm"], final)
+                # anchor BPMs only define the ratio; any pair with ratio 1/rate works
+                stretch_to_wav(src, stretched, 100.0, 100.0 * rate)
+                if (low_cut and low_cut > 0) or (high_cut and high_cut > 0):
+                    apply_freq_trim_wav(stretched, low_cut or 0, high_cut or 0)
                 self._set(fid, status="saving", progress=0.7)
                 out_root = Path(cfg["output"])
                 rel_parent = Path(row["rel"]).parent
                 stem = Path(row["name"]).stem
                 for fmt in cfg["formats"]:
-                    out_path = out_root / rel_parent / output_name(stem, final, fmt)
+                    if final_bpm:
+                        out_path = out_root / rel_parent / output_name(stem, final_bpm, fmt)
+                    else:
+                        out_path = out_root / rel_parent / output_name_rate(stem, rate, fmt)
                     convert_wav(stretched, out_path, fmt)
             self._set(fid, status="done", progress=1.0, error=None)
         except Exception as exc:  # noqa: BLE001
             self._set(fid, status="error", progress=0.0, error=f"process: {exc}")
             self.log_error(fid, "process", f"{exc} (backend={self.backend})")
+
+    def start_process_one(self, rel: str, rate: float,
+                            low_cut: float = 0, high_cut: float = 0) -> dict:
+        with self.lock:
+            if self.running:
+                return {"ok": False, "error": "job already running", "code": 409}
+            row = next((f for f in self.files if f["id"] == rel), None)
+            if not row:
+                return {"ok": False, "error": "unknown file", "code": 404}
+            try:
+                rate = float(rate)
+            except (TypeError, ValueError):
+                return {"ok": False, "error": "bad rate", "code": 400}
+            if not 0.25 <= rate <= 4:
+                return {"ok": False, "error": "rate must be 0.25-4", "code": 400}
+            try:
+                high_cut = float(high_cut or 0)
+            except (TypeError, ValueError):
+                return {"ok": False, "error": "bad high_cut", "code": 400}
+            if not 0 <= high_cut <= 22000:
+                return {"ok": False, "error": "high_cut must be 0-22000", "code": 400}
+            try:
+                low_cut = float(low_cut or 0)
+            except (TypeError, ValueError):
+                return {"ok": False, "error": "bad low_cut", "code": 400}
+            if not 0 <= low_cut <= 1000:
+                return {"ok": False, "error": "low_cut must be 0-1000", "code": 400}
+            src_bpm = row.get("source_bpm") or 0
+            final = round(float(src_bpm) * rate, 2) if src_bpm else None
+            src = Path(self.config["input"]) / row["rel"]
+            snapshot_row = dict(row)
+            self.running = True
+            self.phase = "process"
+            self.stop_requested = False
+        threading.Thread(
+            target=self._run_process_one,
+            args=(rel, snapshot_row, src, rate, final, low_cut, high_cut),
+            daemon=True,
+        ).start()
+        out = {"ok": True, "rate": rate}
+        if final:
+            out["final_bpm"] = final
+        return out
+
+    def _run_process_one(self, fid: str, row: dict, src: Path,
+                         rate: float, final_bpm: float | None,
+                         low_cut: float, high_cut: float):
+        try:
+            self._process_one_custom(fid, row, src, rate, final_bpm, low_cut, high_cut)
+        finally:
+            with self.lock:
+                self.running = False
+                self.phase = "idle"
+                self.stop_requested = False
 
 
 STORE = Store()
@@ -541,13 +655,23 @@ class Handler(BaseHTTPRequestHandler):
                 return {"ok": False, "error": "file not found"}
         except Exception as exc:
             return {"ok": False, "error": str(exc)}
+        # save BPM to restore after rescan (so trim doesn't wipe it)
+        saved_bpm = None
+        saved_manual = False
+        try:
+            if Path(STORE.config["input"]).resolve() == root.resolve():
+                for ff in STORE.files:
+                    if ff.get("rel") == safe_rel:
+                        saved_bpm = ff.get("source_bpm")
+                        saved_manual = ff.get("manual", False)
+                        break
+        except Exception:
+            pass
         try:
             data = self.rfile.read(int(self.headers.get("Content-Length") or 0))
             if not data:
                 return {"ok": False, "error": "empty body"}
-            # basic WAV validation: RIFF header
             if len(data) < 44 or data[0:4] != b"RIFF":
-                # allow anyway — client encodes WAV
                 pass
             with open(rp, "wb") as f:
                 f.write(data)
@@ -556,11 +680,23 @@ class Handler(BaseHTTPRequestHandler):
                 STORE.rescan()
             except Exception:
                 pass
-            # also refresh outputs
             try:
                 STORE._rescan_outputs()
             except Exception:
                 pass
+            # restore BPM without re-analyzing
+            if saved_bpm is not None:
+                try:
+                    with STORE.lock:
+                        for ff in STORE.files:
+                            if ff.get("rel") == safe_rel:
+                                ff["source_bpm"] = saved_bpm
+                                ff["manual"] = saved_manual
+                                ff["progress"] = 1.0
+                                ff["status"] = "queued"
+                                break
+                except Exception:
+                    pass
             return {"ok": True, "filename": rp.name, "rel": safe_rel}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": str(exc)}
@@ -611,6 +747,39 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 new_rel = new_base
             return {"ok": True, "old": rel, "new": new_rel, "filename": new_base}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def _handle_delete(self, rel: str, root: Path) -> dict:
+        rel = rel.lstrip("/")
+        if not rel:
+            return {"ok": False, "error": "rel required"}
+        p = root / rel
+        try:
+            rp = p.resolve()
+            rr = root.resolve()
+            if not str(rp).startswith(str(rr)):
+                return {"ok": False, "error": "forbidden"}
+            if not rp.is_file():
+                return {"ok": False, "error": "file not found"}
+            rp.unlink()
+            # remove empty parent dirs (but keep root)
+            try:
+                parent = rp.parent
+                while parent != rr and parent.is_dir() and not any(parent.iterdir()):
+                    parent.rmdir()
+                    parent = parent.parent
+            except OSError:
+                pass
+            try:
+                STORE.rescan()
+            except Exception:
+                pass
+            try:
+                STORE._rescan_outputs()
+            except Exception:
+                pass
+            return {"ok": True, "deleted": rel}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": str(exc)}
 
@@ -774,6 +943,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(self._clear_folder(STORE.config["input"]))
         if path == "/api/clear_output":
             return self._send_json(self._clear_folder(STORE.config["output"]))
+        if path == "/api/clear_bpm":
+            return self._send_json(STORE.clear_bpm())
         if path == "/api/rename":
             kind = (body.get("kind") or "").strip()
             rel = (body.get("rel") or body.get("id") or body.get("old") or "").strip()
@@ -783,6 +954,22 @@ class Handler(BaseHTTPRequestHandler):
             root = Path(STORE.config["input"]) if kind == "input" else Path(STORE.config["output"])
             res = self._handle_rename(rel, new_name, root)
             code = 200 if res.get("ok") else 400
+            return self._send_json(res, code)
+        if path == "/api/delete":
+            kind = (body.get("kind") or "").strip()
+            rel = (body.get("rel") or body.get("id") or "").strip()
+            if kind not in ("input", "output"):
+                return self._send_json({"ok": False, "error": "kind must be input or output"}, 400)
+            root = Path(STORE.config["input"]) if kind == "input" else Path(STORE.config["output"])
+            res = self._handle_delete(rel, root)
+            code = 200 if res.get("ok") else 400
+            return self._send_json(res, code)
+        if path == "/api/process_one":
+            rel = (body.get("rel") or body.get("id") or "").strip()
+            res = STORE.start_process_one(rel, body.get("rate", 1.0),
+                                          body.get("low_cut", 0),
+                                          body.get("high_cut", 0))
+            code = res.pop("code", 200 if res.get("ok") else 400)
             return self._send_json(res, code)
         return self._send_bytes(b"not found", "text/plain", 404)
 

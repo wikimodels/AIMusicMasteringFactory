@@ -8,53 +8,35 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 <script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 </head>
 <body>
 <nav class="navbar">
-  <div class="navbar-left">
-    <span class="material-icons navbar-logo">graphic_eq</span>
-    <span class="navbar-title">BPM Retimer</span>
-    <span id="backend" class="chip">engine: …</span>
-    <span id="runstate" class="chip idle">idle</span>
+  <div class="navbar-main">
+    <div class="navbar-left">
+      <span class="material-icons navbar-logo">graphic_eq</span>
+      <span class="navbar-title">BPM Retimer</span>
+      <span id="backend" class="chip">engine: …</span>
+      <span id="runstate" class="chip idle">idle</span>
+    </div>
+    <div class="navbar-actions">
+      <input id="file-picker" type="file" accept=".wav,.mp3,.m4a,.flac,.ogg,.opus,.aac,.wma,.aiff,.aif" multiple hidden>
+      <button id="btn-add-files" class="btn btn-primary" title="Добавить файлы в input"><span class="material-icons">playlist_add</span> Добавить файлы</button>
+      <button id="btn-open-input" class="btn btn-tonal" title="Открыть папку input"><span class="material-icons">folder_open</span> Input</button>
+      <button id="btn-open-output" class="btn btn-tonal" title="Открыть папку output"><span class="material-icons">folder_special</span> Output</button>
+      <button id="btn-clear-input" class="btn btn-danger" title="Очистить папку input (из настроек)"><span class="material-icons">delete_sweep</span> Clear Input</button>
+      <button id="btn-clear-output" class="btn btn-danger" title="Очистить папку output (из настроек)"><span class="material-icons">folder_delete</span> Clear Output</button>
+      <button id="btn-config" class="btn btn-tonal" title="Настройки путей"><span class="material-icons">settings</span> Config</button>
+    </div>
   </div>
-  <div class="navbar-actions">
-    <input id="file-picker" type="file" accept=".wav,.mp3,.m4a,.flac,.ogg,.opus,.aac,.wma,.aiff,.aif" multiple hidden>
-    <button id="btn-add-files" class="btn btn-primary" title="Добавить файлы в input"><span class="material-icons">playlist_add</span> Добавить файлы</button>
-    <button id="btn-open-input" class="btn btn-tonal" title="Открыть папку input"><span class="material-icons">folder_open</span> Input</button>
-    <button id="btn-open-output" class="btn btn-tonal" title="Открыть папку output"><span class="material-icons">folder_special</span> Output</button>
-    <button id="btn-clear-input" class="btn btn-danger" title="Очистить папку input (из настроек)"><span class="material-icons">delete_sweep</span> Clear Input</button>
-    <button id="btn-clear-output" class="btn btn-danger" title="Очистить папку output (из настроек)"><span class="material-icons">folder_delete</span> Clear Output</button>
+  <div id="top-progress" class="navbar-progress">
+    <div class="bar"><div id="overall-fill" class="fill"></div></div>
+    <span id="overall-text">0 / 0</span>
   </div>
 </nav>
 
 <main class="container">
-
-<!-- Stepper — 2 этапа (ТЗ) -->
-<ol class="stepper">
-  <li id="st-1" class="step active"><span class="step-num">1</span><span class="step-label"><b>Анализ</b><small>определение BPM</small></span></li>
-  <li class="step-sep"></li>
-  <li id="st-2" class="step"><span class="step-num">2</span><span class="step-label"><b>Retiming</b><small>целевой BPM + разброс</small></span></li>
-</ol>
-
-<!-- Этап 1 — Анализ -->
-<section class="card">
-  <div class="card-header">
-    <h2><span class="material-icons">search</span> Этап 1 — Предварительный анализ</h2>
-    <span class="muted small">Оцени автоопределённые BPM перед обработкой</span>
-  </div>
-  <div class="row">
-    <button id="btn-scan" class="btn btn-tonal"><span class="material-icons">refresh</span> Сканировать</button>
-    <button id="btn-detect" class="btn btn-primary"><span class="material-icons">analytics</span> Определить BPM</button>
-    <button id="btn-stop-detect" class="btn btn-outline hidden"><span class="material-icons">stop</span> Стоп</button>
-    <span id="detect-hint" class="muted small" style="align-self:center;"></span>
-  </div>
-  <div class="overall">
-    <div class="bar"><div id="overall-fill" class="fill"></div></div>
-    <span id="overall-text">0 / 0</span>
-  </div>
-</section>
 
 <!-- Очередь — карточки с плеером -->
 <section class="card">
@@ -90,11 +72,8 @@
 <section class="card" id="card-retime">
   <div class="card-header">
     <h2><span class="material-icons">tune</span> Этап 2 — Ретайминг</h2>
-    <span class="muted small">Задай целевой темп и разброс, затем запусти обработку</span>
   </div>
   <div class="grid">
-    <label class="field">Целевой BPM <input id="cfg-target" type="number" min="1" step="0.1"></label>
-    <label class="field">Разброс N (%) <input id="cfg-spread" type="number" min="0" step="0.1"></label>
     <label class="field">Воркеры <input id="cfg-workers" type="number" min="1" max="16" step="1"></label>
     <fieldset class="fmts">
       <legend>Форматы вывода</legend>
@@ -116,6 +95,10 @@
     <button id="btn-start" class="btn btn-primary btn-large"><span class="material-icons">play_arrow</span> Start Retiming</button>
     <button id="btn-stop" class="btn btn-danger hidden"><span class="material-icons">stop</span> Стоп</button>
   </div>
+  <div class="overall" style="margin-top:14px">
+    <div class="bar"><div id="retiming-fill" class="fill"></div></div>
+    <span id="retiming-text">0 / 0</span>
+  </div>
 </section>
 
 <section class="card">
@@ -125,7 +108,39 @@
 
 </main>
 
+<div id="config-modal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span class="material-icons">settings</span> Конфиг</h3>
+      <button id="btn-close-config" class="btn btn-icon" style="width:32px;height:32px"><span class="material-icons">close</span></button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">
+      <label class="field">Input папка <input id="modal-cfg-input" type="text"></label>
+      <label class="field">Output папка <input id="modal-cfg-output" type="text"></label>
+      <div class="grid">
+        <label class="field">Целевой BPM <input id="modal-cfg-target" type="number" min="1" step="0.1"></label>
+        <label class="field">Разброс N (%) <input id="modal-cfg-spread" type="number" min="0" step="0.1"></label>
+        <label class="field">Воркеры <input id="modal-cfg-workers" type="number" min="1" max="16" step="1"></label>
+        <label class="field">Срез низов (Гц) <input id="modal-cfg-low" type="number" min="0" max="1000" step="1"></label>
+        <label class="field">Срез верхов (Гц) <input id="modal-cfg-high" type="number" min="0" max="22000" step="100"></label>
+      </div>
+      <fieldset class="fmts">
+        <legend>Форматы вывода</legend>
+        <label><input type="checkbox" class="fmt modal-fmt" value="wav"> WAV</label>
+        <label><input type="checkbox" class="fmt modal-fmt" value="mp3"> MP3</label>
+        <label><input type="checkbox" class="fmt modal-fmt" value="m4a"> M4A</label>
+        <label><input type="checkbox" class="fmt modal-fmt" value="ogg"> OGG</label>
+      </fieldset>
+      <div class="muted small">Дефолт: 40 BPM / 1% / 4 воркера / все форматы. Пути: C:\Users\Vitali\Downloads\AIMusicTools\BPM-Retimer\input|output</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button id="btn-cancel-config" class="btn btn-tonal">Отмена</button>
+      <button id="btn-save-config" class="btn btn-primary"><span class="material-icons">save</span> Сохранить</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="hidden"></div>
-<script src="app.js"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

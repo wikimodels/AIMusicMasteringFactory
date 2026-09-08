@@ -2,9 +2,14 @@
   "input": "C:\\Users\\Vitali\\Downloads\\AIMusicTools\\BPM-Retimer\\input",
   "output": "C:\\Users\\Vitali\\Downloads\\AIMusicTools\\BPM-Retimer\\output",
   "target_bpm": 40.0,
-  "spread": 2.0,
+  "spread": 1.0,
   "formats": [
-    "wav"
+    "wav",
+    "mp3",
+    "m4a",
+    "ogg"
   ],
-  "workers": 4
+  "workers": 4,
+  "low_cut": 30.0,
+  "high_cut": 3000.0
 }

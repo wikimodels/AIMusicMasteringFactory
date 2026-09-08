@@ -3,6 +3,21 @@
   const $ = (id) => document.getElementById(id);
   const toastEl = $('toast');
   let wavesurfers = [];
+  let prevFilesKey = "";
+  let prevOutsKey = "";
+  // per-card options, survive re-renders, keyed by file rel
+  let cardOpts = {};
+
+  function rateLabel(rate, src) {
+    const r = Number(rate).toFixed(2) + 'x';
+    if (src != null) return r + ' → ' + Math.round(Number(src) * Number(rate)) + ' BPM';
+    return r;
+  }
+  function freqLabel(hz) {
+    hz = Number(hz) || 0;
+    if (hz <= 0) return 'Выкл';
+    return hz >= 1000 ? (hz / 1000).toFixed(1) + ' кГц' : hz + ' Гц';
+  }
 
   function toast(msg, isErr) {
     const icon = isErr ? 'error' : 'check_circle';
@@ -36,6 +51,12 @@
     if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + " KB";
     return (bytes/1024/1024).toFixed(1) + " MB";
   }
+  function pluralFiles(n){
+    const m10=n%10,m100=n%100;
+    if(m10===1&&m100!==11) return n+" файл";
+    if(m10>=2&&m10<=4&&(m100<10||m100>=20)) return n+" файла";
+    return n+" файлов";
+  }
 
   function chipForStatus(s) {
     if (s === "done") return '<span class="chip chip-done">done</span>';
@@ -44,37 +65,37 @@
     return '<span class="chip chip-queue">' + esc(s) + '</span>';
   }
 
+  let lastConfig = {};
   function fillConfig(cfg) {
+    lastConfig = Object.assign({}, cfg);
     $('cfg-input').value = cfg.input || '';
     $('cfg-output').value = cfg.output || '';
-    $('cfg-target').value = cfg.target_bpm;
-    $('cfg-spread').value = cfg.spread;
+    const ct = $('cfg-target'), cs = $('cfg-spread');
+    if (ct) ct.value = cfg.target_bpm;
+    if (cs) cs.value = cfg.spread;
     $('cfg-workers').value = cfg.workers;
+    // modal
+    const mIn=$('modal-cfg-input'), mOut=$('modal-cfg-output'), mT=$('modal-cfg-target'), mS=$('modal-cfg-spread'), mW=$('modal-cfg-workers'), mL=$('modal-cfg-low'), mH=$('modal-cfg-high');
+    if(mIn) mIn.value = cfg.input || '';
+    if(mOut) mOut.value = cfg.output || '';
+    if(mT) mT.value = cfg.target_bpm;
+    if(mS) mS.value = cfg.spread;
+    if(mW) mW.value = cfg.workers;
+    if(mL) mL.value = cfg.low_cut ?? 30;
+    if(mH) mH.value = cfg.high_cut ?? 3000;
     document.querySelectorAll('.fmt').forEach((c) => {
+      c.checked = (cfg.formats || []).includes(c.value);
+    });
+    document.querySelectorAll('.modal-fmt').forEach((c)=>{
       c.checked = (cfg.formats || []).includes(c.value);
     });
   }
 
   function stepState(running, phase) {
-    const s1 = $('st-1'), s2 = $('st-2');
-    s1.classList.remove('active', 'done');
-    s2.classList.remove('active', 'done');
-    if (!running) {
-      s1.classList.add('done');
-      s2.classList.add('active');
-    } else if (phase === 'detect') {
-      s1.classList.add('active');
-    } else if (phase === 'process') {
-      s1.classList.add('done');
-      s2.classList.add('active');
-    }
-    const sd = $('btn-stop-detect'), sp = $('btn-stop');
-    const showDetect = running && phase === 'detect';
+    const sp = $('btn-stop');
     const showProcess = running && phase === 'process';
-    sd.classList.toggle('hidden', !showDetect);
     sp.classList.toggle('hidden', !showProcess);
     $('btn-start').disabled = !!running;
-    $('btn-detect').disabled = !!running;
   }
 
   function destroyWavesurfers() {
@@ -121,7 +142,7 @@
       trimOverlay = document.createElement('div');
       trimOverlay.className = 'trim-overlay';
       trimOverlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
-      trimOverlay.innerHTML = '<div class="trim-line trim-start-line" style="position:absolute;top:0;bottom:0;width:2px;background:rgba(124,196,255,.85);left:0%"></div><div class="trim-line trim-end-line" style="position:absolute;top:0;bottom:0;width:2px;background:rgba(124,196,255,.85);left:100%"></div>';
+      trimOverlay.innerHTML = '<div class="trim-line trim-start-line" style="position:absolute;top:0;bottom:0;width:2px;background:rgba(74,222,128,.9);left:0%"></div><div class="trim-line trim-end-line" style="position:absolute;top:0;bottom:0;width:2px;background:rgba(244,114,182,.9);left:100%"></div>';
       waveformContainer.style.position = 'relative';
       waveformContainer.appendChild(trimOverlay);
     }
@@ -213,22 +234,56 @@
     rs.className = 'chip ' + (state.running ? 'run' : 'idle');
     stepState(state.running, state.phase);
 
-    const hint = $('detect-hint');
-    if (state.running && state.phase === 'detect') hint.textContent = 'Анализ…';
-    else if (!state.files.length) hint.textContent = 'Добавь файлы и запусти анализ';
-    else {
-      const missing = state.files.filter((f) => f.source_bpm == null).length;
-      hint.textContent = missing ? 'Без BPM: ' + missing : 'Готово к ретаймингу — задай целевой BPM и нажми Start Retiming';
+    // top sticky bar: overall retiming progress (done/total)
+    const isProcess = state.running && state.phase === 'process';
+    $('overall-fill').style.width = Math.round((isProcess ? state.progress : (state.done / (state.total || 1))) * 100) + '%';
+    $('overall-text').textContent = state.done + ' / ' + state.total + ' готово' + (state.errors_count ? ', ошибок: ' + state.errors_count : '');
+    // retiming overall
+    const retFill = $('retiming-fill'), retText = $('retiming-text');
+    if (retFill && retText) {
+      retFill.style.width = Math.round((isProcess ? state.progress : (state.done / (state.total||1))) * 100) + '%';
+      retText.textContent = state.done + ' / ' + state.total + ' готово';
     }
-
-    $('overall-fill').style.width = Math.round(state.progress * 100) + '%';
-    $('overall-text').textContent =
-      state.done + ' / ' + state.total + ' готово' +
-      (state.errors_count ? ', ошибок: ' + state.errors_count : '');
     $('qcount').textContent = state.total ? '(' + state.total + ')' : '';
     $('ocount').textContent = (state.outputs && state.outputs.length) ? '(' + state.outputs.length + ')' : '';
 
-    // destroy old wavesurfers before re-render
+    // avoid flicker: if file list unchanged, just patch progress/status without recreating waveforms
+    const filesKey = JSON.stringify(state.files.map(f=>[f.rel,f.status,Math.round((f.progress||0)*100),f.source_bpm]));
+    const outsKey = JSON.stringify((state.outputs||[]).map(o=>o.rel));
+    const sameFiles = filesKey === prevFilesKey;
+    const sameOuts = outsKey === prevOutsKey;
+    if (sameFiles && sameOuts && document.querySelectorAll('.audio-card').length) {
+      // patch existing cards
+      state.files.forEach(f=>{
+        const card = document.querySelector(`.audio-card[data-audio="${f.audio_url}"]`);
+        if (!card) return;
+        const chip = card.querySelector('.chip');
+        if (chip) chip.outerHTML = chipForStatus(f.status);
+        const fill = card.querySelector('.audio-card-progress .fill');
+        if (fill) fill.style.width = Math.round((f.progress||0)*100)+'%';
+        const errEl = card.querySelector('.audio-card-error');
+        if (f.error) {
+          if (errEl) errEl.textContent = f.error;
+          else {
+            const div = document.createElement('div');
+            div.className = 'audio-card-error';
+            div.textContent = f.error;
+            card.appendChild(div);
+          }
+        } else if (errEl) errEl.remove();
+      });
+      const errs = state.errors || [];
+      $('ecount').textContent = errs.length ? '(' + errs.length + ')' : '';
+      $('errors').innerHTML = errs.length
+        ? errs.slice().reverse().map((e) =>
+            '<div class="err-row"><b>' + esc(e.file) + '</b> [' + esc(e.stage) + '] ' + esc(e.error) + '</div>')
+          .join('')
+        : 'пока чисто';
+      $('errors').classList.toggle('muted', !errs.length);
+      return;
+    }
+    prevFilesKey = filesKey;
+    prevOutsKey = outsKey;
     destroyWavesurfers();
 
     // --- input cards ---
@@ -241,22 +296,21 @@
         const card = document.createElement('div');
         card.className = 'audio-card';
         card.dataset.audio = f.audio_url;
+        const defHigh = lastConfig.high_cut ?? 3000;
+        const defLow = lastConfig.low_cut ?? 30;
+        const opts = cardOpts[f.rel] || (cardOpts[f.rel] = {rate: 1, high: defHigh, low: defLow});
         card.innerHTML = `
           <div class="audio-card-header">
             <button class="btn-play" title="Play / Pause"><span class="material-icons">play_arrow</span></button>
-            <button class="btn btn-icon" title="Stop" style="width:32px;height:32px;border-radius:50%;padding:0"><span class="material-icons" style="font-size:18px">stop</span></button>
+            <button class="btn-stop" title="Stop"><span class="material-icons">stop</span></button>
             <div class="audio-card-title" title="Клик — переименовать" data-kind="input" data-rel="${esc(f.rel)}" data-orig="${esc(f.name)}">${esc(f.name)}</div>
             ${chipForStatus(f.status)}
+            <button class="btn-delete" title="Удалить трек" data-del-kind="input" data-del-rel="${esc(f.rel)}"><span class="material-icons">delete</span></button>
           </div>
           <div class="audio-card-meta">
-            <span><span class="material-icons" style="font-size:14px;vertical-align:middle">speed</span> <b>${f.source_bpm!=null?esc(f.source_bpm):'—'}</b> BPM</span>
             <span><span class="material-icons" style="font-size:14px;vertical-align:middle">schedule</span> ${esc(f.duration_str||'—')}</span>
             <span>${fmtSize(f.size)}</span>
-            ${f.final_bpm!=null?'<span>→ <b>'+esc(f.final_bpm)+'</b> BPM</span>':''}
-          </div>
-          <div class="audio-card-meta">
-            <label style="display:flex;align-items:center;gap:4px;font-size:.78rem">BPM <input type="number" min="1" step="0.1" value="${f.source_bpm!=null?esc(f.source_bpm):''}" data-edit="${esc(f.id)}" title="Enter — сохранить"></label>
-            <button class="btn btn-tonal" style="padding:4px 10px;font-size:.75rem" data-redetect="${esc(f.id)}" title="Переопределить BPM"><span class="material-icons" style="font-size:14px">refresh</span> BPM</button>
+            ${f.source_bpm!=null?'<span class="chip chip-queue" style="padding:1px 6px;font-size:.7rem"><span class="material-icons" style="font-size:12px;vertical-align:middle">speed</span> '+esc(f.source_bpm)+' BPM</span>':''}
           </div>
           <div class="waveform-container" id="wf-in-${idx}"><div class="waveform-loading"><span class="material-icons" style="font-size:14px;animation:spin 1s linear infinite">sync</span> Loading…</div></div>
           <div class="trimmer-container">
@@ -265,18 +319,76 @@
             <input type="range" class="trim-end" min="0" max="100" value="100" title="End trim">
             <button class="btn small save-trim-btn" style="padding:3px 8px;font-size:11px;white-space:nowrap"><span class="material-icons" style="font-size:14px">save</span></button>
           </div>
+          <div class="trimmer-container" title="Скорость воспроизведения и обработки (превью — как магнитофон, с изменением питча)">
+            <span class="material-icons" title="Скорость">speed</span>
+            <input type="range" class="rate-slider" min="0.5" max="2" step="0.01" value="${opts.rate}" title="Скорость: медленнее ↔ быстрее">
+            <span class="rate-label">${rateLabel(opts.rate, f.source_bpm)}</span>
+          </div>
+          <div class="trimmer-container" title="Срез верхов после растягивания (0 — выкл)">
+            <span class="material-icons" title="Срез верхов">filter_alt</span>
+            <input type="range" class="freq-slider" min="0" max="20000" step="100" value="${opts.high}" title="Срез верхов, Гц (0 — выкл)">
+            <span class="freq-label">${freqLabel(opts.high)}</span>
+          </div>
+          <div class="trimmer-container" title="Срез низов после растягивания (0 — выкл)">
+            <span class="material-icons" title="Срез низов">filter_alt</span>
+            <input type="range" class="low-slider" min="0" max="200" step="1" value="${opts.low}" title="Срез низов, Гц (0 — выкл)">
+            <span class="low-label">${freqLabel(opts.low)}</span>
+          </div>
+          <button class="btn btn-primary btn-process" title="Обработать этот трек с выбранной скоростью и срезом">Обработать</button>
           <div class="audio-card-progress"><div class="fill" style="width:${Math.round(f.progress*100)}%"></div></div>
           ${f.error?'<div class="audio-card-error">'+esc(f.error)+'</div>':''}
         `;
         grid.appendChild(card);
 
         const playBtn = card.querySelector('.btn-play');
-        const stopBtn = card.querySelector('.btn-icon');
+        const stopBtn = card.querySelector('.btn-stop');
+        const delBtn = card.querySelector('.btn-delete');
         const wfContainer = card.querySelector('.waveform-container');
         const ws = createWaveSurfer(wfContainer, f.audio_url + '?t=' + Date.now());
+        try { ws.setPlaybackRate(opts.rate); } catch(e) {}
+        ws.on('ready', ()=>{ try { ws.setPlaybackRate(opts.rate); } catch(e) {} });
+        const rateSlider = card.querySelector('.rate-slider');
+        const rateLbl = card.querySelector('.rate-label');
+        rateSlider.addEventListener('input', ()=>{
+          opts.rate = parseFloat(rateSlider.value);
+          rateLbl.textContent = rateLabel(opts.rate, f.source_bpm);
+          try { ws.setPlaybackRate(opts.rate); } catch(e) {}
+        });
+        const freqSlider = card.querySelector('.freq-slider');
+        const freqLbl = card.querySelector('.freq-label');
+        freqSlider.addEventListener('input', ()=>{
+          opts.high = parseFloat(freqSlider.value);
+          freqLbl.textContent = freqLabel(opts.high);
+        });
+        const lowSlider = card.querySelector('.low-slider');
+        const lowLbl = card.querySelector('.low-label');
+        lowSlider.addEventListener('input', ()=>{
+          opts.low = parseFloat(lowSlider.value);
+          lowLbl.textContent = freqLabel(opts.low);
+        });
+        const procBtn = card.querySelector('.btn-process');
+        procBtn.addEventListener('click', async ()=>{
+          try{
+            const r = await fetch('/api/process_one', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({rel: f.rel, rate: opts.rate, low_cut: opts.low, high_cut: opts.high})});
+            const j = await r.json();
+            if (!r.ok || !j.ok) throw new Error(j.error||'process failed');
+            toast('Обработка запущена' + (j.final_bpm ? ' → ' + j.final_bpm + ' BPM' : ' (' + opts.rate.toFixed(2) + 'x)'), false);
+          }catch(e){ toast('Не Ок — '+(e.message||'ошибка'), true); }
+        });
         // play/pause
         playBtn.addEventListener('click', ()=> ws.playPause());
         stopBtn.addEventListener('click', ()=> ws.stop());
+        if (delBtn) delBtn.addEventListener('click', async ()=>{
+          if (!confirm(`Удалить "${f.name}"?`)) return;
+          try{
+            const r = await fetch('/api/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({kind:'input', rel: f.rel})});
+            const j = await r.json();
+            if (!r.ok || !j.ok) throw new Error(j.error||'delete failed');
+            toast(`Удалено ${pluralFiles(1)}`, false);
+            try{ ws.destroy(); }catch(e){}
+            await refresh();
+          }catch(e){ toast('Не Ок — '+(e.message||'ошибка'), true); }
+        });
         ws.on('play', ()=>{
           playBtn.querySelector('.material-icons').textContent = 'pause';
           // pause others
@@ -318,14 +430,14 @@
         card.innerHTML = `
           <div class="audio-card-header">
             <button class="btn-play" title="Play / Pause"><span class="material-icons">play_arrow</span></button>
-            <button class="btn btn-icon" title="Stop" style="width:32px;height:32px;border-radius:50%;padding:0"><span class="material-icons" style="font-size:18px">stop</span></button>
+            <button class="btn-stop" title="Stop"><span class="material-icons">stop</span></button>
             <div class="audio-card-title" title="Клик — переименовать" data-kind="output" data-rel="${esc(o.rel)}" data-orig="${esc(o.name)}">${esc(o.name)}</div>
-            <span class="chip chip-done">${o.bpm?esc(o.bpm)+' BPM':'—'}</span>
+            <span class="chip chip-done">${o.bpm?esc(o.bpm)+' BPM':(o.rate_tag?esc(o.rate_tag):'—')}</span>
+            <button class="btn-delete" title="Удалить трек" data-del-kind="output" data-del-rel="${esc(o.rel)}"><span class="material-icons">delete</span></button>
           </div>
           <div class="audio-card-meta">
             <span><span class="material-icons" style="font-size:14px;vertical-align:middle">schedule</span> ${esc(o.duration_str||'—')}</span>
             <span>${fmtSize(o.size)}</span>
-            ${o.bpm?'<span><b>'+esc(o.bpm)+'</b> BPM</span>':''}
           </div>
           <div class="waveform-container" id="wf-out-${idx}"><div class="waveform-loading"><span class="material-icons" style="font-size:14px;animation:spin 1s linear infinite">sync</span> Loading…</div></div>
           <div class="trimmer-container">
@@ -338,11 +450,23 @@
         ogrid.appendChild(card);
 
         const playBtn = card.querySelector('.btn-play');
-        const stopBtn = card.querySelector('.btn-icon');
+        const stopBtn = card.querySelector('.btn-stop');
+        const delBtn = card.querySelector('.btn-delete');
         const wfContainer = card.querySelector('.waveform-container');
         const ws = createWaveSurfer(wfContainer, o.audio_url + '?t=' + Date.now());
         playBtn.addEventListener('click', ()=> ws.playPause());
         stopBtn.addEventListener('click', ()=> ws.stop());
+        if (delBtn) delBtn.addEventListener('click', async ()=>{
+          if (!confirm(`Удалить "${o.name}"?`)) return;
+          try{
+            const r = await fetch('/api/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({kind:'output', rel: o.rel})});
+            const j = await r.json();
+            if (!r.ok || !j.ok) throw new Error(j.error||'delete failed');
+            toast(`Удалено ${pluralFiles(1)}`, false);
+            try{ ws.destroy(); }catch(e){}
+            await refresh();
+          }catch(e){ toast('Не Ок — '+(e.message||'ошибка'), true); }
+        });
         ws.on('play', ()=>{
           playBtn.querySelector('.material-icons').textContent = 'pause';
           wavesurfers.forEach(other=>{ if(other!==ws && other.isPlaying()) other.pause(); });
@@ -440,11 +564,12 @@
   }
 
   function readConfig() {
+    const ct = $('cfg-target'), cs = $('cfg-spread');
     return {
       input: $('cfg-input').value.trim(),
       output: $('cfg-output').value.trim(),
-      target_bpm: parseFloat($('cfg-target').value),
-      spread: parseFloat($('cfg-spread').value),
+      target_bpm: ct ? parseFloat(ct.value) : lastConfig.target_bpm,
+      spread: cs ? parseFloat(cs.value) : lastConfig.spread,
       workers: parseInt($('cfg-workers').value, 10),
       formats: Array.from(document.querySelectorAll('.fmt'))
         .filter((c) => c.checked).map((c) => c.value),
@@ -461,18 +586,6 @@
 
     $('btn-save').addEventListener('click', async () => {
       try { const j = await api('/api/config', readConfig()); fillConfig(j.config); await refresh(); toast('Пути сохранены'); }
-      catch (e) { toast(String(e.message || e), true); }
-    });
-    $('btn-scan').addEventListener('click', async () => {
-      try { const j = await api('/api/scan'); render(j); }
-      catch (e) { toast(String(e.message || e), true); }
-    });
-    $('btn-detect').addEventListener('click', async () => {
-      try { const j = await api('/api/detect'); toast(j.targets ? 'Анализ запущен: ' + j.targets : 'Все BPM уже определены'); }
-      catch (e) { toast(String(e.message || e), true); }
-    });
-    $('btn-stop-detect').addEventListener('click', async () => {
-      try { await api('/api/stop'); toast('Остановка запрошена'); }
       catch (e) { toast(String(e.message || e), true); }
     });
     $('btn-start').addEventListener('click', async () => {
@@ -501,15 +614,55 @@
       const cfg = await (await fetch('/api/state')).json().then(j=>j.config).catch(()=>null);
       const dir = cfg ? cfg.input : 'input';
       if (!confirm(`Очистить папку INPUT?\n${dir}\nБудут удалены ВСЕ файлы (включая подпапки). Отменить нельзя.`)) return;
-      try { const j = await api('/api/clear_input'); toast(`Input очищен: удалено ${j.deleted} файл(ов)`); await refresh(); }
+      try { const j = await api('/api/clear_input'); toast(`Удалено ${pluralFiles(j.deleted)}`); await refresh(); }
       catch (e) { toast(String(e.message || e), true); }
     });
     $('btn-clear-output').addEventListener('click', async () => {
       const cfg = await (await fetch('/api/state')).json().then(j=>j.config).catch(()=>null);
       const dir = cfg ? cfg.output : 'output';
       if (!confirm(`Очистить папку OUTPUT?\n${dir}\nБудут удалены ВСЕ файлы (включая подпапки). Отменить нельзя.`)) return;
-      try { const j = await api('/api/clear_output'); toast(`Output очищен: удалено ${j.deleted} файл(ов)`); await refresh(); }
+      try { const j = await api('/api/clear_output'); toast(`Удалено ${pluralFiles(j.deleted)}`); await refresh(); }
       catch (e) { toast(String(e.message || e), true); }
+    });
+    // Config modal (navbar) — все поля + пути
+    const cfgModal = $('config-modal');
+    const openCfg = ()=>{
+      // sync from last known config
+      $('modal-cfg-input').value = lastConfig.input || '';
+      $('modal-cfg-output').value = lastConfig.output || '';
+      $('modal-cfg-target').value = lastConfig.target_bpm;
+      $('modal-cfg-spread').value = lastConfig.spread;
+      $('modal-cfg-workers').value = lastConfig.workers;
+      $('modal-cfg-low').value = lastConfig.low_cut ?? 30;
+      $('modal-cfg-high').value = lastConfig.high_cut ?? 3000;
+      document.querySelectorAll('.modal-fmt').forEach(c=>{
+        c.checked = document.querySelector(`.fmt[value="${c.value}"]`)?.checked || false;
+      });
+      cfgModal.classList.remove('hidden');
+    };
+    const closeCfg = ()=> cfgModal.classList.add('hidden');
+    $('btn-config')?.addEventListener('click', openCfg);
+    $('btn-close-config')?.addEventListener('click', closeCfg);
+    $('btn-cancel-config')?.addEventListener('click', closeCfg);
+    cfgModal?.addEventListener('click', e=>{ if(e.target===cfgModal) closeCfg(); });
+    $('btn-save-config')?.addEventListener('click', async ()=>{
+      const payload = {
+        input: $('modal-cfg-input').value.trim(),
+        output: $('modal-cfg-output').value.trim(),
+        target_bpm: parseFloat($('modal-cfg-target').value),
+        spread: parseFloat($('modal-cfg-spread').value),
+        workers: parseInt($('modal-cfg-workers').value,10),
+        low_cut: parseFloat($('modal-cfg-low').value),
+        high_cut: parseFloat($('modal-cfg-high').value),
+        formats: Array.from(document.querySelectorAll('.modal-fmt')).filter(c=>c.checked).map(c=>c.value),
+      };
+      try{
+        const j = await api('/api/config', payload);
+        fillConfig(j.config);
+        closeCfg();
+        toast('Конфиг сохранён');
+        await refresh();
+      }catch(e){ toast(String(e.message||e), true); }
     });
     const picker = $('file-picker');
     $('btn-add-files').addEventListener('click', () => picker.click());
@@ -522,8 +675,7 @@
         const r = await fetch('/api/upload', { method: 'POST', body: fd });
         const j = await r.json();
         if (!r.ok || !j.ok) throw new Error(j.error || ('HTTP ' + r.status));
-        let msg = 'Добавлено: ' + j.saved.join(', ');
-        if (j.errors && j.errors.length) msg += ' | ' + j.errors.join('; ');
+        const msg = `Добавлено ${pluralFiles(j.saved.length)}`;
         toast(msg, !!(j.errors && j.errors.length));
         await refresh();
       } catch (e) { toast(String(e.message || e), true); }

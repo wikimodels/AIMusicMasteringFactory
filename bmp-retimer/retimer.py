@@ -29,6 +29,7 @@ import soundfile as sf
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from bpm_stretch import (  # noqa: E402
+    build_freq_filter as _build_freq_filter,
     detect_bpm as _detect_bpm,
     stretch_with_librosa as _stretch_librosa,
     stretch_with_rubberband as _stretch_rubberband,
@@ -149,6 +150,26 @@ def stretch_to_wav(in_path: str | Path, out_wav_path: str | Path,
     return {"backend": backend, "ratio": ratio, "sr": int(sr)}
 
 
+def apply_freq_trim_wav(wav_path: str | Path, low_cut: float = 0,
+                        high_cut: float = 0) -> bool:
+    """ffmpeg high-pass/low-pass pass over a WAV file, in place (via temp).
+
+    Same filter code as bpm_stretch.apply_freq_trim. Returns True if filtered,
+    False if both cuts are 0 (no-op).
+    """
+    filt = _build_freq_filter(low_cut, high_cut)
+    if not filt:
+        return False
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        raise RuntimeError("ffmpeg not found on PATH (needed for frequency trim)")
+    tmp = str(wav_path) + ".trimtmp.wav"
+    cmd = [ffmpeg, "-y", "-v", "error", "-i", str(wav_path), "-af", filt, tmp]
+    subprocess.run(cmd, check=True, timeout=3600)
+    os.replace(tmp, str(wav_path))
+    return True
+
+
 def convert_wav(in_wav: str | Path, out_path: str | Path, fmt: str):
     """Convert WAV to target format. WAV is written directly, rest via ffmpeg."""
     fmt = fmt.lower()
@@ -175,3 +196,10 @@ def output_name(stem: str, final_bpm: float, fmt: str) -> str:
     """<stem>_<bpm>bpm.<ext> — bpm rounded to int (per TZ example)."""
     ext, _ = FFMPEG_FMT[fmt.lower()]
     return f"{stem}_{int(round(final_bpm))}bpm{ext}"
+
+
+def output_name_rate(stem: str, rate: float, fmt: str) -> str:
+    """<stem>_<rate>x.<ext> — when source BPM is unknown (no analysis)."""
+    ext, _ = FFMPEG_FMT[fmt.lower()]
+    rs = ("%.2f" % float(rate)).rstrip("0").rstrip(".")
+    return f"{stem}_{rs}x{ext}"
