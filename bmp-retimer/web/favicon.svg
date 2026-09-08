@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1a1d27"/>
+  <rect x="0.7" y="0.7" width="62.6" height="62.6" rx="14" fill="none" stroke="#2e3347" stroke-width="1.4" opacity="0.9"/>
+  <!-- EQ bars -->
+  <g stroke="#7cc4ff" stroke-linecap="round" stroke-width="5" opacity="0.98">
+    <path d="M18 42 L18 24"/>
+    <path d="M27.5 42 L27.5 16"/>
+    <path d="M37 42 L37 26"/>
+    <path d="M46.5 42 L46.5 19"/>
+  </g>
+  <!-- horizontal double arrow = retiming below bars -->
+  <g stroke="#4ade80" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" fill="none">
+    <path d="M14 50 H50"/>
+    <path d="M50 50 L45.2 46.2 M50 50 L45.2 53.8"/>
+    <path d="M14 50 L18.8 46.2 M14 50 L18.8 53.8"/>
+  </g>
+</svg>

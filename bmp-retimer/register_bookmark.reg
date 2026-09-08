@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Classes\bpmretimer]
+@="URL:BPMRetimer Protocol"
+"URL Protocol"=""
+
+[HKEY_CURRENT_USER\Software\Classes\bpmretimer\shell]
+
+[HKEY_CURRENT_USER\Software\Classes\bpmretimer\shell\open]
+
+[HKEY_CURRENT_USER\Software\Classes\bpmretimer\shell\open\command]
+@="wscript.exe \"D:\\GitHub\\AIMusicMasteringFactory\\bmp-retimer\\run_silent.vbs\""

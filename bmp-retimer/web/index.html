@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPM Retimer</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="navbar">
+  <div class="navbar-left">
+    <span class="material-icons navbar-logo">graphic_eq</span>
+    <span class="navbar-title">BPM Retimer</span>
+    <span id="backend" class="chip">engine: …</span>
+    <span id="runstate" class="chip idle">idle</span>
+  </div>
+  <div class="navbar-actions">
+    <input id="file-picker" type="file" accept=".wav,.mp3,.m4a,.flac,.ogg,.opus,.aac,.wma,.aiff,.aif" multiple hidden>
+    <button id="btn-add-files" class="btn btn-primary" title="Добавить файлы в input"><span class="material-icons">playlist_add</span> Добавить файлы</button>
+    <button id="btn-open-input" class="btn btn-tonal" title="Открыть папку input"><span class="material-icons">folder_open</span> Input</button>
+    <button id="btn-open-output" class="btn btn-tonal" title="Открыть папку output"><span class="material-icons">folder_special</span> Output</button>
+  </div>
+</nav>
+
+<main class="container">
+
+<!-- Stepper — 2 этапа (ТЗ) -->
+<ol class="stepper">
+  <li id="st-1" class="step active"><span class="step-num">1</span><span class="step-label"><b>Анализ</b><small>определение BPM</small></span></li>
+  <li class="step-sep"></li>
+  <li id="st-2" class="step"><span class="step-num">2</span><span class="step-label"><b>Retiming</b><small>целевой BPM + разброс</small></span></li>
+</ol>
+
+<!-- Этап 1 — Анализ -->
+<section class="card">
+  <div class="card-header">
+    <h2><span class="material-icons">search</span> Этап 1 — Предварительный анализ</h2>
+    <span class="muted small">Оцени автоопределённые BPM перед обработкой</span>
+  </div>
+  <div class="row">
+    <button id="btn-scan" class="btn btn-tonal"><span class="material-icons">refresh</span> Сканировать</button>
+    <button id="btn-detect" class="btn btn-primary"><span class="material-icons">analytics</span> Определить BPM</button>
+    <button id="btn-stop-detect" class="btn btn-outline hidden"><span class="material-icons">stop</span> Стоп</button>
+    <span id="detect-hint" class="muted small" style="align-self:center;"></span>
+  </div>
+  <div class="overall">
+    <div class="bar"><div id="overall-fill" class="fill"></div></div>
+    <span id="overall-text">0 / 0</span>
+  </div>
+</section>
+
+<!-- Очередь (общая для обоих этапов) -->
+<section class="card">
+  <div class="card-header">
+    <h2><span class="material-icons">queue_music</span> Очередь <span id="qcount" class="muted"></span></h2>
+    <span class="muted small">Клик по BPM — ручная правка (Enter), ↻ — переопределить</span>
+  </div>
+  <div class="table-wrap">
+  <table id="queue">
+    <thead><tr>
+      <th>Файл</th><th>Статус</th><th>Исходный BPM ✎</th>
+      <th>Итоговый BPM</th><th>Прогресс</th><th></th>
+    </tr></thead>
+    <tbody id="qbody"><tr><td colspan="6" class="muted">пусто — добавь файлы или положи их в папку input</td></tr></tbody>
+  </table>
+  </div>
+</section>
+
+<!-- Этап 2 — Настройки ретайминга -->
+<section class="card" id="card-retime">
+  <div class="card-header">
+    <h2><span class="material-icons">tune</span> Этап 2 — Ретайминг</h2>
+    <span class="muted small">Задай целевой темп и разброс, затем запусти обработку</span>
+  </div>
+  <div class="grid">
+    <label class="field">Целевой BPM <input id="cfg-target" type="number" min="1" step="0.1"></label>
+    <label class="field">Разброс N (%) <input id="cfg-spread" type="number" min="0" step="0.1"></label>
+    <label class="field">Воркеры <input id="cfg-workers" type="number" min="1" max="16" step="1"></label>
+    <fieldset class="fmts">
+      <legend>Форматы вывода</legend>
+      <label><input type="checkbox" class="fmt" value="wav" checked> WAV</label>
+      <label><input type="checkbox" class="fmt" value="mp3"> MP3</label>
+      <label><input type="checkbox" class="fmt" value="m4a"> M4A</label>
+      <label><input type="checkbox" class="fmt" value="ogg"> OGG</label>
+    </fieldset>
+  </div>
+  <details class="paths">
+    <summary class="muted small">Пути (по умолчанию — Downloads\AIMusicTools\BPM-Retimer)</summary>
+    <div class="grid" style="margin-top:10px;">
+      <label class="field wide">Input папка <input id="cfg-input" type="text" size="52"></label>
+      <label class="field wide">Output папка <input id="cfg-output" type="text" size="52"></label>
+      <button id="btn-save" class="btn btn-tonal"><span class="material-icons">save</span> Сохранить пути</button>
+    </div>
+  </details>
+  <div class="row" style="margin-top:14px;">
+    <button id="btn-start" class="btn btn-primary btn-large"><span class="material-icons">play_arrow</span> Start Retiming</button>
+    <button id="btn-stop" class="btn btn-danger hidden"><span class="material-icons">stop</span> Стоп</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2><span class="material-icons">error_outline</span> Ошибки <span id="ecount" class="muted"></span></h2>
+  <div id="errors" class="muted">пока чисто</div>
+</section>
+
+</main>
+
+<div id="toast" class="hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>
