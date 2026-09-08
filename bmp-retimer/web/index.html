@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.min.js"></script>
 </head>
 <body>
 <nav class="navbar">
@@ -23,6 +24,8 @@
     <button id="btn-add-files" class="btn btn-primary" title="Добавить файлы в input"><span class="material-icons">playlist_add</span> Добавить файлы</button>
     <button id="btn-open-input" class="btn btn-tonal" title="Открыть папку input"><span class="material-icons">folder_open</span> Input</button>
     <button id="btn-open-output" class="btn btn-tonal" title="Открыть папку output"><span class="material-icons">folder_special</span> Output</button>
+    <button id="btn-clear-input" class="btn btn-danger" title="Очистить папку input (из настроек)"><span class="material-icons">delete_sweep</span> Clear Input</button>
+    <button id="btn-clear-output" class="btn btn-danger" title="Очистить папку output (из настроек)"><span class="material-icons">folder_delete</span> Clear Output</button>
   </div>
 </nav>
 
@@ -53,22 +56,35 @@
   </div>
 </section>
 
-<!-- Очередь (общая для обоих этапов) -->
+<!-- Очередь — карточки с плеером -->
 <section class="card">
   <div class="card-header">
     <h2><span class="material-icons">queue_music</span> Очередь <span id="qcount" class="muted"></span></h2>
-    <span class="muted small">Клик по BPM — ручная правка (Enter), ↻ — переопределить</span>
+    <span class="muted small">BPM — Enter для правки, ↻ — переопределить</span>
   </div>
-  <div class="table-wrap">
-  <table id="queue">
-    <thead><tr>
-      <th>Файл</th><th>Статус</th><th>Исходный BPM ✎</th>
-      <th>Итоговый BPM</th><th>Прогресс</th><th></th>
-    </tr></thead>
-    <tbody id="qbody"><tr><td colspan="6" class="muted">пусто — добавь файлы или положи их в папку input</td></tr></tbody>
-  </table>
-  </div>
+  <div id="input-cards" class="cards-grid"></div>
 </section>
+
+<section class="card">
+  <div class="card-header">
+    <h2><span class="material-icons">library_music</span> Готово — Output <span id="ocount" class="muted"></span></h2>
+    <span class="muted small">Обработанные файлы можно сразу проиграть</span>
+  </div>
+  <div id="output-cards" class="cards-grid"></div>
+</section>
+
+<audio id="global-player" preload="metadata" style="display:none"></audio>
+<div id="now-playing" class="now-playing hidden">
+  <div class="now-playing-info">
+    <span class="material-icons">graphic_eq</span>
+    <span id="now-playing-name">—</span>
+    <span id="now-playing-time" class="muted small">0:00 / 0:00</span>
+  </div>
+  <div class="now-playing-controls">
+    <button id="np-play" class="btn btn-icon" title="Play/Pause"><span class="material-icons">pause</span></button>
+    <button id="np-stop" class="btn btn-icon" title="Stop"><span class="material-icons">stop</span></button>
+  </div>
+</div>
 
 <!-- Этап 2 — Настройки ретайминга -->
 <section class="card" id="card-retime">

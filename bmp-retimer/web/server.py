@@ -50,6 +50,37 @@ from retimer import (  # noqa: E402
     stretch_to_wav,
 )
 
+def _audio_duration(path: Path) -> float | None:
+    try:
+        from tinytag import TinyTag
+        tag = TinyTag.get(str(path))
+        if tag.duration:
+            return round(float(tag.duration), 2)
+    except Exception:
+        pass
+    # fallback via soundfile / librosa quickly
+    try:
+        import soundfile as sf
+        info = sf.info(str(path))
+        if info.samplerate and info.frames:
+            return round(info.frames / float(info.samplerate), 2)
+    except Exception:
+        pass
+    return None
+
+def _fmt_duration(sec: float | None) -> str:
+    if sec is None:
+        return "—"
+    m = int(sec // 60)
+    s = int(sec % 60)
+    return f"{m}:{s:02d}" if m else f"0:{s:02d}"
+
+def _scan_outputs(output_dir: str | Path) -> list[Path]:
+    root = Path(output_dir)
+    if not root.is_dir():
+        return []
+    return sorted([p for p in root.rglob("*") if p.is_file() and p.suffix.lower() in AUDIO_EXTS])
+
 NEW_DEFAULT_INPUT = Path.home() / "Downloads" / "AIMusicTools" / "BPM-Retimer" / "input"
 NEW_DEFAULT_OUTPUT = Path.home() / "Downloads" / "AIMusicTools" / "BPM-Retimer" / "output"
 
@@ -74,6 +105,7 @@ class Store:
         self.lock = threading.Lock()
         self.config = self._load_config()
         self.files: list[dict] = []
+        self.outputs: list[dict] = []
         self.running = False
         self.phase = "idle"          # idle | detect | process
         self.stop_requested = False
@@ -148,6 +180,7 @@ class Store:
             except ValueError:
                 rel = p.name
             prev = old.get(rel, {})
+            dur = _audio_duration(p)
             files.append({
                 "id": rel,
                 "rel": rel,
@@ -156,9 +189,12 @@ class Store:
                 "status": prev.get("status", "queued") if prev.get("status") != "detecting" else "queued",
                 "source_bpm": prev.get("source_bpm"),
                 "manual": bool(prev.get("manual", False)),
-                "final_bpm": None,
+                "final_bpm": prev.get("final_bpm"),
                 "progress": 0.0 if prev.get("status") not in ("done",) else 1.0,
                 "error": None,
+                "duration": dur,
+                "duration_str": _fmt_duration(dur),
+                "audio_url": f"/audio/input/{rel}",
             })
         with self.lock:
             # don't clobber a running job's live rows
@@ -169,16 +205,50 @@ class Store:
                 for f in files:
                     if f["id"] not in by_id:
                         self.files.append(f)
+        self._rescan_outputs()
+
+    def _rescan_outputs(self):
+        cfg = dict(self.config)
+        found = _scan_outputs(cfg["output"])
+        root = Path(cfg["output"])
+        outs = []
+        for p in found:
+            try:
+                rel = p.relative_to(root).as_posix()
+            except ValueError:
+                rel = p.name
+            dur = _audio_duration(p)
+            # try parse BPM from filename like name_40bpm.wav
+            m = re.search(r"_(\d+)bpm", p.stem, re.I)
+            bpm = int(m.group(1)) if m else None
+            outs.append({
+                "rel": rel,
+                "name": p.name,
+                "size": p.stat().st_size,
+                "bpm": bpm,
+                "duration": dur,
+                "duration_str": _fmt_duration(dur),
+                "audio_url": f"/audio/output/{rel}",
+            })
+        with self.lock:
+            self.outputs = outs
 
     def snapshot(self) -> dict:
+        # refresh outputs on each snapshot so cards are always fresh
+        try:
+            self._rescan_outputs()
+        except Exception:
+            pass
         with self.lock:
             files = [dict(f) for f in self.files]
+            outs = [dict(o) for o in self.outputs]
             done = sum(1 for f in files if f["status"] == "done")
             erro = sum(1 for f in files if f["status"] == "error")
             prog = (sum(f["progress"] for f in files) / len(files)) if files else 0.0
             return {
                 "config": dict(self.config),
                 "files": files,
+                "outputs": outs,
                 "running": self.running,
                 "phase": self.phase,
                 "total": len(files),
@@ -358,6 +428,58 @@ class Handler(BaseHTTPRequestHandler):
             p.read_bytes(),
             mimetypes.guess_type(name)[0] or "application/octet-stream")
 
+    def _serve_audio(self, root: Path, rel: str):
+        # security: block traversal
+        safe_rel = rel.lstrip("/")
+        p = (root / safe_rel)
+        try:
+            rp = p.resolve()
+            rr = root.resolve()
+            if not str(rp).startswith(str(rr)):
+                return self._send_bytes(b"forbidden", "text/plain", 403)
+            if not rp.is_file():
+                return self._send_bytes(b"not found", "text/plain", 404)
+            ctype = mimetypes.guess_type(str(rp))[0] or "application/octet-stream"
+            # fix for common types
+            if rp.suffix.lower() == ".m4a":
+                ctype = "audio/mp4"
+            size = rp.stat().st_size
+            range_hdr = self.headers.get("Range")
+            if range_hdr:
+                m = re.match(r"bytes=(\d*)-(\d*)", range_hdr)
+                if m:
+                    s = m.group(1); e = m.group(2)
+                    start = int(s) if s else 0
+                    end = int(e) if e else size - 1
+                    end = min(end, size - 1)
+                    if start >= size:
+                        self.send_response(416)
+                        self.send_header("Content-Range", f"bytes */{size}")
+                        self.end_headers()
+                        return
+                    length = end - start + 1
+                    self.send_response(206)
+                    self.send_header("Content-Type", ctype)
+                    self.send_header("Content-Length", str(length))
+                    self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+                    self.send_header("Accept-Ranges", "bytes")
+                    self.send_header("Cache-Control", "no-store")
+                    self.end_headers()
+                    with open(rp, "rb") as f:
+                        f.seek(start)
+                        shutil.copyfileobj(f, self.wfile)
+                    return
+            self.send_response(200)
+            self.send_header("Content-Type", ctype)
+            self.send_header("Content-Length", str(size))
+            self.send_header("Accept-Ranges", "bytes")
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            with open(rp, "rb") as f:
+                shutil.copyfileobj(f, self.wfile)
+        except Exception as exc:  # noqa: BLE001
+            self._send_bytes(f"error: {exc}".encode(), "text/plain", 500)
+
     def _open_folder(self, path: str | Path) -> dict:
         p = Path(path)
         try:
@@ -372,6 +494,123 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 subprocess.Popen(["xdg-open", str(p)])
             return {"ok": True, "path": str(p)}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def _clear_folder(self, path: str | Path) -> dict:
+        p = Path(path)
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+        except OSError as exc:
+            return {"ok": False, "error": str(exc)}
+        deleted = 0
+        # delete all files recursively, keep the root folder itself
+        for child in sorted(p.rglob("*"), reverse=True):
+            try:
+                if child.is_file() or child.is_symlink():
+                    child.unlink()
+                    deleted += 1
+                elif child.is_dir():
+                    try:
+                        child.rmdir()
+                    except OSError:
+                        pass
+            except OSError:
+                pass
+        # queue must reflect cleared input
+        cfg_input = Path(STORE.config["input"])
+        try:
+            if p.resolve() == cfg_input.resolve():
+                STORE.rescan()
+        except OSError:
+            STORE.rescan()
+        return {"ok": True, "deleted": deleted, "path": str(p)}
+
+    def _handle_trim(self, rel: str, root: Path) -> dict:
+        # raw WAV bytes in request body, overwrite file
+        rel = __import__("urllib.parse", fromlist=["unquote"]).unquote(rel)
+        # block traversal
+        safe_rel = rel.lstrip("/")
+        p = (root / safe_rel)
+        try:
+            rp = p.resolve()
+            rr = root.resolve()
+            if not str(rp).startswith(str(rr)):
+                return {"ok": False, "error": "forbidden"}
+            if not rp.is_file():
+                return {"ok": False, "error": "file not found"}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+        try:
+            data = self.rfile.read(int(self.headers.get("Content-Length") or 0))
+            if not data:
+                return {"ok": False, "error": "empty body"}
+            # basic WAV validation: RIFF header
+            if len(data) < 44 or data[0:4] != b"RIFF":
+                # allow anyway — client encodes WAV
+                pass
+            with open(rp, "wb") as f:
+                f.write(data)
+            # refresh queues
+            try:
+                STORE.rescan()
+            except Exception:
+                pass
+            # also refresh outputs
+            try:
+                STORE._rescan_outputs()
+            except Exception:
+                pass
+            return {"ok": True, "filename": rp.name, "rel": safe_rel}
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "error": str(exc)}
+
+    def _handle_rename(self, rel: str, new_name: str, root: Path) -> dict:
+        rel = rel.lstrip("/")
+        new_name = (new_name or "").strip()
+        if not rel or not new_name:
+            return {"ok": False, "error": "name required"}
+        # take only basename, block traversal
+        new_base = Path(new_name).name.strip()
+        if not new_base:
+            return {"ok": False, "error": "invalid name"}
+        # keep extension if not provided
+        old_path = root / rel
+        try:
+            rp = old_path.resolve()
+            rr = root.resolve()
+            if not str(rp).startswith(str(rr)):
+                return {"ok": False, "error": "forbidden"}
+            if not rp.is_file():
+                return {"ok": False, "error": "file not found"}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+        # preserve extension if new name has none
+        if "." not in new_base:
+            new_base = new_base + rp.suffix
+        # sanitize: replace path separators, control chars
+        new_base = new_base.replace("/", "_").replace("\\", "_")
+        if len(new_base) > 180:
+            new_base = new_base[:180]
+        new_path = rp.parent / new_base
+        if new_path.exists():
+            return {"ok": False, "error": "file already exists"}
+        try:
+            rp.rename(new_path)
+            try:
+                STORE.rescan()
+            except Exception:
+                pass
+            try:
+                STORE._rescan_outputs()
+            except Exception:
+                pass
+            # compute new rel
+            try:
+                new_rel = new_path.relative_to(rr).as_posix()
+            except ValueError:
+                new_rel = new_base
+            return {"ok": True, "old": rel, "new": new_rel, "filename": new_base}
         except Exception as exc:  # noqa: BLE001
             return {"ok": False, "error": str(exc)}
 
@@ -452,12 +691,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_static("index.html")
         if path.lstrip("/") in ("app.js", "style.css", "favicon.ico", "favicon.svg", "favicon.png"):
             return self._send_static(path.lstrip("/"))
+        if path.startswith("/audio/input/"):
+            rel = path[len("/audio/input/"):]
+            rel = __import__("urllib.parse", fromlist=["unquote"]).unquote(rel)
+            return self._serve_audio(Path(STORE.config["input"]), rel)
+        if path.startswith("/audio/output/"):
+            rel = path[len("/audio/output/"):]
+            rel = __import__("urllib.parse", fromlist=["unquote"]).unquote(rel)
+            return self._serve_audio(Path(STORE.config["output"]), rel)
         if path == "/api/state":
             return self._send_json({"ok": True, **STORE.snapshot()})
         return self._send_bytes(b"not found", "text/plain", 404)
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
+        # raw trim endpoints — handle before JSON parsing
+        if path.startswith("/api/trim/input/"):
+            rel = path[len("/api/trim/input/"):]
+            res = self._handle_trim(rel, Path(STORE.config["input"]))
+            code = 200 if res.get("ok") else 400
+            return self._send_json(res, code)
+        if path.startswith("/api/trim/output/"):
+            rel = path[len("/api/trim/output/"):]
+            res = self._handle_trim(rel, Path(STORE.config["output"]))
+            code = 200 if res.get("ok") else 400
+            return self._send_json(res, code)
         # multipart endpoints (upload) — don't try to JSON-parse the body
         if path == "/api/upload":
             res = self._handle_upload(self.headers.get("Content-Type", ""))
@@ -512,6 +770,20 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(self._open_folder(STORE.config["input"]))
         if path == "/api/open_output":
             return self._send_json(self._open_folder(STORE.config["output"]))
+        if path == "/api/clear_input":
+            return self._send_json(self._clear_folder(STORE.config["input"]))
+        if path == "/api/clear_output":
+            return self._send_json(self._clear_folder(STORE.config["output"]))
+        if path == "/api/rename":
+            kind = (body.get("kind") or "").strip()
+            rel = (body.get("rel") or body.get("id") or body.get("old") or "").strip()
+            new_name = (body.get("newName") or body.get("new_name") or body.get("name") or "").strip()
+            if kind not in ("input", "output"):
+                return self._send_json({"ok": False, "error": "kind must be input or output"}, 400)
+            root = Path(STORE.config["input"]) if kind == "input" else Path(STORE.config["output"])
+            res = self._handle_rename(rel, new_name, root)
+            code = 200 if res.get("ok") else 400
+            return self._send_json(res, code)
         return self._send_bytes(b"not found", "text/plain", 404)
 
     @staticmethod

@@ -1,10 +1,10 @@
 {
   "input": "C:\\Users\\Vitali\\Downloads\\AIMusicTools\\BPM-Retimer\\input",
   "output": "C:\\Users\\Vitali\\Downloads\\AIMusicTools\\BPM-Retimer\\output",
-  "target_bpm": 60.0,
+  "target_bpm": 40.0,
   "spread": 2.0,
   "formats": [
-    "mp3"
+    "wav"
   ],
   "workers": 4
 }
