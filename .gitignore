@@ -48,6 +48,18 @@ sorting/cuts/*
 *.flac
 *.m4a
 *.mp4
+*.mid
+
+# ─── Generated Data & Audio Dirs (DO NOT COMMIT) ───────────
+baroque_master_300/
+!baroque_master_300/00_CATALOG.md
+ARCHIVE/
+SELECTION_REJECTED/
+dark_jazz_collection/
+golden_fond_audio/
+artists/
+bmp-retimer/server.log
+ЗолотойФонд/
 *.mkv
 *.mov
 *.avi

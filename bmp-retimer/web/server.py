@@ -939,6 +939,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(self._open_folder(STORE.config["input"]))
         if path == "/api/open_output":
             return self._send_json(self._open_folder(STORE.config["output"]))
+        if path == "/api/open_loops":
+            return self._send_json(self._open_folder(r"C:\Users\Vitali\Downloads\AIMusicTools\Loops"))
+        if path == "/api/open_selection":
+            return self._send_json(self._open_folder(r"D:\GitHub\AIMusicMasteringFactory\SELECTION"))
         if path == "/api/clear_input":
             return self._send_json(self._clear_folder(STORE.config["input"]))
         if path == "/api/clear_output":

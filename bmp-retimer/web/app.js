@@ -602,6 +602,14 @@
     });
 
     // Navbar: open folders + add files + clear
+    $('btn-open-loops')?.addEventListener('click', async () => {
+      try { const j = await api('/api/open_loops'); toast('Открыта папка: ' + j.path); }
+      catch (e) { toast(String(e.message || e), true); }
+    });
+    $('btn-open-selection')?.addEventListener('click', async () => {
+      try { const j = await api('/api/open_selection'); toast('Открыта папка: ' + j.path); }
+      catch (e) { toast(String(e.message || e), true); }
+    });
     $('btn-open-input').addEventListener('click', async () => {
       try { const j = await api('/api/open_input'); toast('Открыта папка: ' + j.path); }
       catch (e) { toast(String(e.message || e), true); }
