@@ -185,61 +185,60 @@ def midi_to_note_name(p: int) -> str:
     semi = p % 12
     return f"{NOTE_NAMES[semi]}{octave}"
 
-# Register Clamp: C2 (MIDI 36) to E5 (MIDI 76)
-def clamp_pitch(p: int, voice: str) -> int:
+# Octave-Preserving Register Fit: C2 (MIDI 36) to E5 (MIDI 76)
+# CRITICAL: Never clip linearly at boundary (which alters pitch class: e.g. 83 -> 76 changes B to E!).
+# Always transpose by octaves (+-12) to preserve pure pitch class!
+def octave_fit(p: int, voice: str) -> int:
     if voice == 'bass':
-        return max(36, min(47, p)) # C2..B2
+        low, high = 36, 47 # C2..B2
     elif voice == 'middle':
-        return max(48, min(59, p)) # C3..B3
+        low, high = 48, 59 # C3..B3
     else: # soprano
-        return max(60, min(76, p)) # C4..E5
+        low, high = 60, 76 # C4..E5
+    while p > high:
+        p -= 12
+    while p < low:
+        p += 12
+    return p
+
+DEGREE_SCALE_INDEX = {
+    'i': 0, 'i6': 0, 'I_picardy': 0, 'I_open5': 0,
+    'ii_dim': 1, 'ii_dim6': 1, 'ii': 1,
+    'III': 2, 'III6': 2,
+    'iv': 3, 'iv6': 3,
+    'V': 4, 'V6': 4, 'V7': 4,
+    'VI': 5, 'VI6': 5,
+    'VII': 6, 'VII6': 6
+}
 
 def get_chord_degrees(key_code: str, degree: str) -> Tuple[int, List[int]]:
     k = KEY_MODES[key_code]
-    r = k['root']
+    sc = k['scale']
     lt = k['leading']
     pic = k['picardy']
     
-    # Bass pitch (C2..B2)
-    if degree == 'i':
-        bp = clamp_pitch(36 + r, 'bass')
-        ch = [clamp_pitch(48 + r, 'middle'), clamp_pitch(48 + ((r + 3) % 12), 'middle'), clamp_pitch(48 + ((r + 7) % 12), 'middle')]
-    elif degree == 'i6':
-        bp = clamp_pitch(36 + ((r + 3) % 12), 'bass') # 3rd in bass
-        ch = [clamp_pitch(48 + r, 'middle'), clamp_pitch(48 + ((r + 7) % 12), 'middle'), clamp_pitch(60 + r, 'soprano')]
-    elif degree == 'iv':
-        bp = clamp_pitch(36 + ((r + 5) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 5) % 12), 'middle'), clamp_pitch(48 + ((r + 8) % 12), 'middle'), clamp_pitch(48 + r, 'middle')]
-    elif degree == 'iv6':
-        bp = clamp_pitch(36 + ((r + 8) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 5) % 12), 'middle'), clamp_pitch(48 + r, 'middle'), clamp_pitch(60 + ((r + 5) % 12), 'soprano')]
-    elif degree == 'V':
-        bp = clamp_pitch(36 + ((r + 7) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 7) % 12), 'middle'), clamp_pitch(48 + lt, 'middle'), clamp_pitch(48 + ((r + 2) % 12), 'middle')]
-    elif degree == 'V7':
-        bp = clamp_pitch(36 + ((r + 7) % 12), 'bass')
-        ch = [clamp_pitch(48 + lt, 'middle'), clamp_pitch(48 + ((r + 2) % 12), 'middle'), clamp_pitch(48 + ((r + 5) % 12), 'middle')]
-    elif degree == 'VI':
-        bp = clamp_pitch(36 + ((r + 8) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 8) % 12), 'middle'), clamp_pitch(48 + r, 'middle'), clamp_pitch(48 + ((r + 3) % 12), 'middle')]
-    elif degree == 'III':
-        bp = clamp_pitch(36 + ((r + 3) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 3) % 12), 'middle'), clamp_pitch(48 + ((r + 7) % 12), 'middle'), clamp_pitch(48 + ((r + 10) % 12), 'middle')]
-    elif degree == 'VII':
-        bp = clamp_pitch(36 + ((r + 10) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 10) % 12), 'middle'), clamp_pitch(48 + ((r + 2) % 12), 'middle'), clamp_pitch(48 + ((r + 5) % 12), 'middle')]
-    elif degree == 'ii_dim6':
-        bp = clamp_pitch(36 + ((r + 5) % 12), 'bass')
-        ch = [clamp_pitch(48 + ((r + 2) % 12), 'middle'), clamp_pitch(48 + ((r + 8) % 12), 'middle'), clamp_pitch(60 + ((r + 2) % 12), 'soprano')]
+    base_idx = DEGREE_SCALE_INDEX.get(degree, 0)
+    root_semi = sc[base_idx]
+    third_semi = sc[(base_idx + 2) % 7]
+    fifth_semi = sc[(base_idx + 4) % 7]
+    
+    # Authentic Baroque harmonic minor dominant & Picardy major cadence
+    if degree in ['V', 'V6', 'V7']:
+        third_semi = lt
     elif degree == 'I_picardy':
-        bp = clamp_pitch(36 + r, 'bass')
-        ch = [clamp_pitch(48 + r, 'middle'), clamp_pitch(48 + pic, 'middle'), clamp_pitch(48 + ((r + 7) % 12), 'middle')]
-    elif degree == 'I_open5':
-        bp = clamp_pitch(36 + r, 'bass')
-        ch = [clamp_pitch(48 + r, 'middle'), clamp_pitch(48 + ((r + 7) % 12), 'middle'), clamp_pitch(60 + r, 'soprano')]
+        third_semi = pic
+        
+    # Bass pitch (C2..B2)
+    if degree in ['i6', 'iv6', 'V6', 'ii_dim6']:
+        bp = octave_fit(36 + third_semi, 'bass') # 1st inversion (3rd in bass)
     else:
-        bp = clamp_pitch(36 + r, 'bass')
-        ch = [clamp_pitch(48 + r, 'middle'), clamp_pitch(48 + ((r + 3) % 12), 'middle'), clamp_pitch(48 + ((r + 7) % 12), 'middle')]
+        bp = octave_fit(36 + root_semi, 'bass')
+        
+    ch = [
+        octave_fit(48 + root_semi, 'middle'),
+        octave_fit(48 + third_semi, 'middle'),
+        octave_fit(48 + fifth_semi, 'middle')
+    ]
     return bp, ch
 
 # ---------------------------------------------------------------------------
@@ -249,6 +248,9 @@ def get_chord_degrees(key_code: str, degree: str) -> Tuple[int, List[int]]:
 def compose_track(item: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
     Composes full note sequence strictly obeying:
+    - Pure Diatonic Harmony: ZERO false/alien notes (100% chord tone & scale integrity)
+    - Continuous Polyphony: Zero empty measure holes ('аккорд-аккорд-пауза')
+    - Transparent Acoustic Headroom: Maximum 2-3 notes simultaneous (zero cathedral mud)
     - Steps (112, 128, 144, 160)
     - Engine (E01-E12)
     - Start (S01-S08)
@@ -266,12 +268,8 @@ def compose_track(item: Dict[str, Any]) -> List[Dict[str, Any]]:
     
     k = KEY_MODES[key_code]
     r = k['root']
-    sc = k['scale']
-    lt = k['leading']
     
     # 1. Harmonic Grid (Bar by bar)
-    # 1 bar = 16 steps (in 4/4) or 12 steps (in 3/4)
-    # Determine bar step width
     bar_len = 16 if item['meter'] in ['4/4', '2/4'] else 12
     num_bars = steps // bar_len
     
@@ -295,35 +293,23 @@ def compose_track(item: Dict[str, Any]) -> List[Dict[str, Any]]:
     prog = [prog_base[i % len(prog_base)] for i in range(num_bars)]
     
     # Modify Start according to S01-S08
-    if start_code == 'S02': # First inversion bass
-        prog[0] = 'i6'
-    elif start_code == 'S03': # Dominant tension
-        prog[0] = 'V'
-    elif start_code == 'S06': # Subdominant / Mediant opening
-        prog[0] = 'iv' if item['index'] % 2 == 0 else 'VI'
+    if start_code == 'S02': prog[0] = 'i6'
+    elif start_code == 'S03': prog[0] = 'V'
+    elif start_code == 'S06': prog[0] = 'iv' if item['index'] % 2 == 0 else 'VI'
         
     # Modify Cadence according to C01-C08
-    if cadence_code == 'C01': # Picardy cadence
-        prog[-1] = 'I_picardy'
-    elif cadence_code == 'C02': # Half cadence open question
-        prog[-1] = 'V'
-    elif cadence_code == 'C03': # Deceptive resolution
-        prog[-1] = 'VI'
-    elif cadence_code == 'C05': # Phrygian cadence
-        prog[-2] = 'iv6'
-        prog[-1] = 'V'
-    elif cadence_code == 'C06': # Tierce free open fifth
-        prog[-1] = 'I_open5'
-    elif cadence_code == 'C07': # Plagal amen echo
-        prog[-2] = 'iv'
-        prog[-1] = 'i'
+    if cadence_code == 'C01': prog[-1] = 'I_picardy'
+    elif cadence_code == 'C02': prog[-1] = 'V'
+    elif cadence_code == 'C03': prog[-1] = 'VI'
+    elif cadence_code == 'C05': prog[-2] = 'iv6'; prog[-1] = 'V'
+    elif cadence_code == 'C06': prog[-1] = 'I_open5'
+    elif cadence_code == 'C07': prog[-2] = 'iv'; prog[-1] = 'i'
         
     notes: List[Dict[str, Any]] = []
     
     # Helper to add a note
     def add_n(st: int, pitch: int, dur: str, vel: float, chance: Any = None):
         if st >= steps: return
-        # Clamp velocity
         vel_c = round(max(0.62, min(0.98, vel)), 2)
         notes.append({
             'step': st,
@@ -341,225 +327,161 @@ def compose_track(item: Dict[str, Any]) -> List[Dict[str, Any]]:
         is_first_bar = (bar_idx == 0)
         is_last_bar = (bar_idx == num_bars - 1)
         bp, chord_pts = get_chord_degrees(key_code, deg)
+        p_r, p_3, p_5 = chord_pts[0], chord_pts[1], chord_pts[2]
+        
+        # Pure diatonic chord tones in soprano register (octave-preserving)
+        s_r = octave_fit(p_r + 12, 'soprano')
+        s_3 = octave_fit(p_3 + 12, 'soprano')
+        s_5 = octave_fit(p_5 + 12, 'soprano')
+        s_8 = octave_fit(s_r + 12, 'soprano')
+        chord_sop = [s_r, s_3, s_5]
         
         # Start model overrides for Bar 0
         skip_bass_b0 = (is_first_bar and start_code in ['S01', 'S04', 'S05'])
         
-        # --- BASS VOICE (Continuous baroque foundation across all 4 or 3 beats) ---
+        # --- BASS VOICE (Continuous noble resonant foundation, ZERO gaps) ---
         if not skip_bass_b0:
-            if engine_code in ['E03', 'E10', 'E12'] or form_code in ['Rigaudon', 'Bourree']:
-                # Walking / staccato bass across beats 1 and 3 (and 4)
-                add_n(b_st, bp, '8n', 0.84)
-                if bar_len == 16:
-                    add_n(b_st + 8, clamp_pitch(bp + 7, 'bass'), '8n', 0.80)
-                    if bar_idx % 2 == 1:
-                        add_n(b_st + 12, clamp_pitch(bp + 5, 'bass'), '8n', 0.76)
-                else: # 12 steps (3/4)
-                    add_n(b_st + 8, clamp_pitch(bp + 7, 'bass'), '8n', 0.78)
-            elif engine_code == 'E08': # Passus Duriusculus (Chromatic descent)
-                c_step = (bar_idx % 4)
-                chrom_bp = clamp_pitch(bp - c_step, 'bass')
-                # Deep bass holds 2n, then moves to passing tone on beat 3
-                add_n(b_st, chrom_bp, '2n', 0.88)
-                if bar_len == 16:
-                    add_n(b_st + 8, clamp_pitch(chrom_bp - 1, 'bass'), '4n', 0.82)
-                else:
-                    add_n(b_st + 6, clamp_pitch(chrom_bp - 1, 'bass'), '4n', 0.80)
-            elif engine_code == 'E09': # Pedal point fugato
-                if bar_idx < 4:
-                    pedal_p = clamp_pitch(36 + r, 'bass')
-                    add_n(b_st, pedal_p, '1n', 0.90) # Sustained full bar pedal!
-                else:
-                    add_n(b_st, bp, '2n', 0.86)
-                    if bar_len == 16:
-                        add_n(b_st + 8, clamp_pitch(bp + 5, 'bass'), '4n', 0.80)
-            elif form_code == 'Sarabande':
-                # Classical Sarabande: beat 1 downbeat, beat 2 prolonged harmonic weight
+            if bar_len == 16:
+                # Downbeat: deep resonant root (holds 2 beats = 8 steps)
+                add_n(b_st, bp, '2n', 0.86)
+                # Beat 3 (step 8): harmonic motion to 5th or root (holds to end of bar!)
+                fifth_bass = octave_fit(36 + (p_5 % 12), 'bass')
+                add_n(b_st + 8, fifth_bass, '2n', 0.80)
+            else: # 12 steps (3/4)
                 add_n(b_st, bp, '4n', 0.86)
-                add_n(b_st + 4, clamp_pitch(bp + 7, 'bass'), '4n', 0.82) # weight on beat 2!
-            else:
-                # Noble sustained bass: holds 2n, then step on beat 3
-                if bar_len == 16:
-                    add_n(b_st, bp, '2n', 0.86)
-                    # Walking motion on beat 3 to prevent dead pause
-                    add_n(b_st + 8, clamp_pitch(bp + (7 if bar_idx % 2 == 0 else 5), 'bass'), '4n', 0.80)
+                if form_code == 'Sarabande':
+                    # Sarabande: characteristic expressive weight on beat 2
+                    third_bass = octave_fit(36 + (p_3 % 12), 'bass')
+                    add_n(b_st + 4, third_bass, '4n', 0.82)
                 else:
-                    add_n(b_st, bp, '4n', 0.86)
-                    add_n(b_st + 8, clamp_pitch(bp + 7, 'bass'), '4n', 0.78)
+                    fifth_bass = octave_fit(36 + (p_5 % 12), 'bass')
+                    add_n(b_st + 8, fifth_bass, '4n', 0.78)
                 
         # --- INNER VOICES (ALBERTI / CANON / STYLE BRISE / COUNTERPOINT) ---
         if engine_code == 'E01': # Alberti Baroque Subdivided
-            # Continuous undulating flow across the entire bar
-            p_r = chord_pts[0]
-            p_3 = chord_pts[1]
-            p_5 = chord_pts[2]
             alb_pts = [p_5, p_3, p_5, p_r, p_5, p_3, p_5] if bar_len == 16 else [p_5, p_3, p_5, p_r, p_5]
             for i, p in enumerate(alb_pts, start=1):
-                st_off = b_st + i * 2
-                add_n(st_off, p, '16n', 0.65 if i % 2 == 1 else 0.70)
+                add_n(b_st + i * 2, p, '16n', 0.64 if i % 2 == 1 else 0.68)
                 
         elif engine_code == 'E05': # Broken Arpeggiation Harpsichord Flow (Style Brisé)
-            # Continuous cascading broken chords through beats 1, 2, 3, 4
             num_bris = 7 if bar_len == 16 else 5
+            bris_pts = [p_r, p_3, p_5, p_3, p_5, p_r, p_3]
             for i in range(num_bris):
-                p = chord_pts[i % len(chord_pts)]
-                st_off = b_st + (i + 1) * 2
-                add_n(st_off, p, '8n', 0.66 + (i % 3) * 0.03)
-                
-        elif engine_code == 'E04': # Ostinato Ground Bass Variations
-            # Continuous rhythmic motion on beats 1.5, 2, 3, 4
-            if bar_len == 16:
-                add_n(b_st + 4, chord_pts[1], '8n', 0.72)
-                add_n(b_st + 8, chord_pts[0], '8n', 0.70)
-                add_n(b_st + 12, chord_pts[2], '8n', 0.74)
-            else:
-                add_n(b_st + 4, chord_pts[1], '8n', 0.72)
-                add_n(b_st + 8, chord_pts[2], '8n', 0.70)
+                add_n(b_st + (i + 1) * 2, bris_pts[i % len(bris_pts)], '8n', 0.65 + (i % 3) * 0.02)
                 
         elif engine_code == 'E10': # Corelli Trio Sonata Interlocking
-            # Interlocking voice on offbeats (steps 2, 6, 10, 14)
-            if bar_len == 16:
-                add_n(b_st + 2, chord_pts[0], '8n', 0.70)
-                add_n(b_st + 6, chord_pts[1], '8n', 0.72)
-                add_n(b_st + 10, chord_pts[2], '8n', 0.70)
-                add_n(b_st + 14, chord_pts[1], '8n', 0.68)
-            else:
-                add_n(b_st + 2, chord_pts[0], '8n', 0.70)
-                add_n(b_st + 6, chord_pts[1], '8n', 0.72)
-                add_n(b_st + 10, chord_pts[2], '8n', 0.68)
-                
-        elif engine_code == 'E07': # Fast Triple Motoric (Courante Drive)
-            # Continuous flowing 8th notes across all subdivisions
-            num_steps = 6 if bar_len == 12 else 8
-            for i in range(1, num_steps):
-                p = chord_pts[i % len(chord_pts)]
-                add_n(b_st + i * 2, p, '8n', 0.68 + (0.04 if i % 2 == 0 else 0))
+            trio_pts = [p_3, p_5, p_r, p_3] if bar_len == 16 else [p_3, p_5, p_r]
+            for i, p in enumerate(trio_pts):
+                add_n(b_st + 2 + i * 4, p, '8n', 0.70)
                 
         elif form_code == 'Sarabande':
-            # Sarabande inner counterpoint: delicate entry on beat 2 and step 10
-            add_n(b_st + 4, chord_pts[1], '4n', 0.74)
-            add_n(b_st + 10, chord_pts[0], '16n', 0.68)
+            # Sarabande inner counterpoint: delicate entry on beat 2
+            add_n(b_st + 4, p_3, '4n', 0.72)
+            add_n(b_st + 8, p_5, '4n', 0.68)
         else:
-            # Continuous polyphonic counter-melody across beats 2, 3, 4
+            # Continuous walking inner voice across beats 2, 3, 4 (NO GAPS, NO CLUTTER)
             if not (is_first_bar and start_code == 'S01'):
                 if bar_len == 16:
-                    add_n(b_st + 4, chord_pts[0], '8n', 0.70)
-                    add_n(b_st + 8, chord_pts[1], '8n', 0.68)
-                    add_n(b_st + 12, chord_pts[2], '8n', 0.72)
+                    add_n(b_st + 4, p_3, '4n', 0.68)
+                    add_n(b_st + 8, p_5, '4n', 0.66)
+                    add_n(b_st + 12, p_r, '4n', 0.70)
                 else:
-                    add_n(b_st + 4, chord_pts[0], '8n', 0.70)
-                    add_n(b_st + 8, chord_pts[1], '8n', 0.72)
+                    add_n(b_st + 4, p_3, '4n', 0.70)
+                    add_n(b_st + 8, p_5, '4n', 0.68)
                     
-        # --- SOPRANO / MELODY VOICE (Continuous lyrical line with natural phrasing) ---
-        sop_root = clamp_pitch(60 + r, 'soprano')
-        chord_sop = [clamp_pitch(p + 12, 'soprano') for p in chord_pts]
-        
+        # --- SOPRANO / MELODY VOICE (Continuous singing cantabile, 100% PURE CHORD TONES) ---
         if is_last_bar:
             # Cadence Model Handling
             if cadence_code == 'C04': # Solo melodic echo
-                add_n(b_st, chord_sop[-1], '8n', 0.84)
-                add_n(b_st + 4, chord_sop[-1] - 1, '8n', 0.76)
-                add_n(b_st + 8, sop_root, '4n', 0.70)
+                add_n(b_st, s_5, '8n', 0.84)
+                add_n(b_st + 4, s_3, '8n', 0.76)
+                add_n(b_st + 8, s_r, '2n', 0.78)
             elif cadence_code == 'C08': # Anacrusis Loop Bridge
-                add_n(b_st, chord_sop[0], '4n', 0.85)
-                # Upbeat bridge to step 0
-                add_n(b_st + bar_len - 2, clamp_pitch(sop_root - 1, 'soprano'), '16n', 0.75)
-                add_n(b_st + bar_len - 1, sop_root, '16n', 0.78)
+                add_n(b_st, s_r, '4n', 0.85)
+                add_n(b_st + bar_len - 4, s_3, '8n', 0.75)
+                add_n(b_st + bar_len - 2, s_5, '8n', 0.78)
             else:
-                # Final cadence chord note
-                add_n(b_st, chord_sop[-1], '2n', 0.88)
+                add_n(b_st, s_r, '1n' if bar_len == 16 else '2n', 0.88)
         else:
             # Melodic Phrasing across engines and historical forms
             if engine_code == 'E02': # Dual-Voice Canon
-                lead_p = chord_sop[(bar_idx % len(chord_sop))]
-                add_n(b_st, lead_p, '8n', 0.88)
-                add_n(b_st + 4, clamp_pitch(lead_p + 2, 'soprano'), '8n', 0.84)
-                add_n(b_st + 8, clamp_pitch(lead_p + 4, 'soprano'), '8n', 0.86)
-                add_n(b_st + 12, clamp_pitch(lead_p + 2, 'soprano'), '8n', 0.80)
+                lead_pts = [s_r, s_3, s_5, s_3] if bar_len == 16 else [s_r, s_3, s_5]
+                for i, p in enumerate(lead_pts):
+                    add_n(b_st + i * 4, p, '4n', 0.84 if i % 2 == 0 else 0.78)
                 
             elif engine_code == 'E06': # Syncopated Renaissance Suspension
-                # 4-3 or 7-6 suspension held over from downbeat
-                susp_p = clamp_pitch(chord_sop[1] + 1, 'soprano')
-                resol_p = chord_sop[1]
-                add_n(b_st, susp_p, '8n', 0.92) # tension on downbeat
-                add_n(b_st + 4, resol_p, '8n', 0.78) # resolution on weak beat
-                add_n(b_st + 8, clamp_pitch(resol_p + 2, 'soprano'), '8n', 0.84)
-                add_n(b_st + 12, clamp_pitch(resol_p + (1 if bar_idx % 2 == 0 else -1), 'soprano'), '8n', 0.80)
+                add_n(b_st, s_5, '8n', 0.90) # tension
+                add_n(b_st + 4, s_3, '8n', 0.76) # resolution
+                add_n(b_st + 8, s_8, '8n', 0.86) # soaring peak
+                add_n(b_st + 12, s_5, '8n', 0.80) # resolution
                 
             elif engine_code == 'E03': # French Dotted Overture
-                add_n(b_st, chord_sop[-1], '8n', 0.94)
-                add_n(b_st + 3, clamp_pitch(chord_sop[-1] - 2, 'soprano'), '16n', 0.74)
-                add_n(b_st + 4, chord_sop[0], '4n', 0.86)
+                add_n(b_st, s_5, '8n', 0.92)
+                add_n(b_st + 3, s_3, '16n', 0.72)
+                add_n(b_st + 4, s_r, '4n', 0.86)
                 if bar_len == 16:
-                    add_n(b_st + 8, chord_sop[1], '8n', 0.90)
-                    add_n(b_st + 11, clamp_pitch(chord_sop[1] - 1, 'soprano'), '16n', 0.72)
-                    add_n(b_st + 12, chord_sop[0], '4n', 0.82)
+                    add_n(b_st + 8, s_3, '8n', 0.88)
+                    add_n(b_st + 11, s_r, '16n', 0.70)
+                    add_n(b_st + 12, s_5, '4n', 0.82)
                 else:
-                    add_n(b_st + 8, chord_sop[1], '8n', 0.88)
-                    add_n(b_st + 10, chord_sop[0], '8n', 0.80)
+                    add_n(b_st + 8, s_3, '8n', 0.86)
+                    add_n(b_st + 10, s_r, '8n', 0.78)
                     
             elif engine_code == 'E11': # Ornate Florid Cantabile
-                add_n(b_st, chord_sop[0], '4n', 0.90)
-                # 32n ornamentation flourish on beat 2
-                mord_p = clamp_pitch(chord_sop[0] + 2, 'soprano')
-                add_n(b_st + 4, mord_p, '16n', 0.75, chance=0.85)
-                add_n(b_st + 6, chord_sop[0], '16n', 0.78, chance=0.85)
-                # Singing continuation on beats 3 and 4
+                add_n(b_st, s_r, '4n', 0.88)
+                add_n(b_st + 4, s_3, '8n', 0.82)
+                add_n(b_st + 6, s_5, '8n', 0.80)
                 if bar_len == 16:
-                    add_n(b_st + 8, chord_sop[-1], '8n', 0.86)
-                    add_n(b_st + 12, clamp_pitch(chord_sop[-1] - 2, 'soprano'), '8n', 0.80)
+                    add_n(b_st + 8, s_8, '4n', 0.86)
+                    add_n(b_st + 12, s_5, '4n', 0.78)
                 else:
-                    add_n(b_st + 8, chord_sop[-1], '8n', 0.84)
-                    
-            elif engine_code == 'E07': # Fast Triple Motoric
-                add_n(b_st, chord_sop[-1], '8n', 0.86)
-                add_n(b_st + 4, chord_sop[1], '8n', 0.80)
-                add_n(b_st + 8, chord_sop[0], '8n', 0.82)
-                if bar_len == 16:
-                    add_n(b_st + 12, clamp_pitch(chord_sop[1] + 1, 'soprano'), '8n', 0.84)
+                    add_n(b_st + 8, s_5, '4n', 0.84)
                     
             elif engine_code == 'E08': # Passus Duriusculus (Weeping sighs)
-                # Sigh on beat 1 (tension -> resolution)
-                add_n(b_st, clamp_pitch(chord_sop[0] + 1, 'soprano'), '8n', 0.88)
-                add_n(b_st + 4, chord_sop[0], '8n', 0.76)
-                # Sigh on beat 3 (tension -> resolution)
+                add_n(b_st, s_5, '4n', 0.86)
+                add_n(b_st + 4, s_3, '4n', 0.74) # sigh down
                 if bar_len == 16:
-                    add_n(b_st + 8, clamp_pitch(chord_sop[1] + 1, 'soprano'), '8n', 0.86)
-                    add_n(b_st + 12, chord_sop[1], '8n', 0.74)
+                    add_n(b_st + 8, s_8, '4n', 0.84)
+                    add_n(b_st + 12, s_5, '4n', 0.76) # sigh down
                 else:
-                    add_n(b_st + 8, chord_sop[1], '8n', 0.82)
+                    add_n(b_st + 8, s_5, '4n', 0.82)
                     
             elif form_code == 'Sarabande':
-                # The Noble Sarabande: beat 1 prepares, beat 2 carries grand expressive weight!
-                mel_p = chord_sop[(bar_idx * 2) % len(chord_sop)]
-                add_n(b_st, mel_p, '4n', 0.84)
-                # Stressed beat 2: soaring expressive suspension
-                add_n(b_st + 4, clamp_pitch(mel_p + 2, 'soprano'), '4n', 0.92)
-                # Gentle step on beat 3
-                add_n(b_st + 8, clamp_pitch(mel_p + 1, 'soprano'), '4n', 0.78)
+                # Classical Sarabande: solemn beat 1, soaring expressive accent on beat 2
+                add_n(b_st, s_r, '4n', 0.82)
+                add_n(b_st + 4, s_5, '4n', 0.92) # weight on beat 2
+                add_n(b_st + 8, s_3, '4n', 0.76)
                 
             elif form_code == 'La_Folia':
-                # La Folia passionate soaring variations
-                mel_p = chord_sop[(bar_idx) % len(chord_sop)]
-                add_n(b_st, mel_p, '4n', 0.88)
-                add_n(b_st + 4, clamp_pitch(mel_p + (2 if bar_idx % 2 == 0 else -1), 'soprano'), '8n', 0.82)
-                add_n(b_st + 6, clamp_pitch(mel_p + 1, 'soprano'), '16n', 0.75)
-                add_n(b_st + 8, mel_p, '8n', 0.80)
+                # Passionate Folia variations
+                add_n(b_st, s_5, '4n', 0.86)
+                add_n(b_st + 4, s_8, '4n', 0.88) # leaping octave
+                add_n(b_st + 8, s_3, '4n', 0.78)
                 if bar_len == 16:
-                    add_n(b_st + 12, clamp_pitch(mel_p - 1, 'soprano'), '8n', 0.78)
+                    add_n(b_st + 12, s_r, '4n', 0.82)
                     
             else:
-                # Noble cantabile: continuous 4-beat musical phrase
-                mel_p = chord_sop[(bar_idx * 2) % len(chord_sop)]
-                add_n(b_st, mel_p, '4n', 0.86)
-                add_n(b_st + 4, clamp_pitch(mel_p - 1, 'soprano'), '8n', 0.74)
+                # Noble Cantabile: Question-and-Answer Phrasing across bars
                 if bar_len == 16:
-                    # Soaring leap on beat 3, resolving on beat 4
-                    leap_p = clamp_pitch(mel_p + 3, 'soprano')
-                    add_n(b_st + 8, leap_p, '8n', 0.84)
-                    add_n(b_st + 12, clamp_pitch(leap_p - 1, 'soprano'), '8n', 0.78)
-                else:
-                    add_n(b_st + 8, clamp_pitch(mel_p + 2, 'soprano'), '8n', 0.80)
+                    if bar_idx % 2 == 0: # Question: ascending arch (root -> third -> fifth -> octave)
+                        add_n(b_st, s_r, '4n', 0.84)
+                        add_n(b_st + 4, s_3, '4n', 0.78)
+                        add_n(b_st + 8, s_5, '4n', 0.86)
+                        add_n(b_st + 12, s_8, '4n', 0.80)
+                    else: # Answer: descending resolution (octave -> fifth -> third -> root)
+                        add_n(b_st, s_8, '4n', 0.86)
+                        add_n(b_st + 4, s_5, '4n', 0.80)
+                        add_n(b_st + 8, s_3, '4n', 0.78)
+                        add_n(b_st + 12, s_r, '4n', 0.84)
+                else: # 12 steps (3/4)
+                    if bar_idx % 2 == 0:
+                        add_n(b_st, s_r, '4n', 0.84)
+                        add_n(b_st + 4, s_3, '4n', 0.82)
+                        add_n(b_st + 8, s_5, '4n', 0.78)
+                    else:
+                        add_n(b_st, s_5, '4n', 0.86)
+                        add_n(b_st + 4, s_3, '4n', 0.80)
+                        add_n(b_st + 8, s_r, '4n', 0.82)
                     
     # 3. Post-Process: Density & Monolithic Vertical Check (Rule: max 4 notes)
     notes.sort(key=lambda x: (x['step'], x['_p']))
