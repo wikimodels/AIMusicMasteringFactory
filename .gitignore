@@ -53,6 +53,9 @@ sorting/cuts/*
 # ─── Generated Data & Audio Dirs (DO NOT COMMIT) ───────────
 baroque_master_300/
 !baroque_master_300/00_CATALOG.md
+baroque_master_album/
+PILOT_DEMOS/
+SELECTION/
 ARCHIVE/
 SELECTION_REJECTED/
 dark_jazz_collection/

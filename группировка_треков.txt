@@ -1,0 +1,83 @@
+Да, это стоит делать. Из 1000 треков в одном стиле случайная раскидка даст альбомы, где в одном три медленных трека подряд и два в одной тональности, а в другом всё на одном темпе. Проще посчитать признаки треков и раскидать их так, чтобы в каждом альбоме было всего понемногу.
+
+Идея
+Посчитать признаки каждого трека: темп, энергия (громкость), яркость звука (spectral centroid), тембр (MFCC), тональность (chroma), длительность. Если у тебя сохранились промпты и теги из Суно, их тоже можно использовать.
+Кластеризовать треки на ~15 групп по «звучанию» (KMeans).
+Раздать «колодой»: отсортировать треки по кластерам и раздавать по кругу, как карты. В каждом альбоме окажется по 1 треку из каждого кластера.
+Расставить порядок внутри альбома по энергии: например, сильный старт, провал в середине (баллада), финал.
+
+1000 / 15 = 66,67, поэтому будет 66 альбомов по 15 треков и один на 10. Можно сделать 67 альбомов по 14–15 треков, в коде это настраивается.
+
+Код
+python
+import numpy as np, pandas as pd, librosa
+from pathlib import Path
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+from joblib import Parallel, delayed
+
+TRACKS = sorted(Path("tracks").glob("*.mp3"))
+ALBUM_SIZE = 15
+N_ALBUMS = int(np.ceil(len(TRACKS) / ALBUM_SIZE))  # 67
+
+def features(path):
+    y, sr = librosa.load(path, sr=22050, mono=True, duration=120)  # первые 2 минуты хватит
+    tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    chroma = librosa.feature.chroma_cqt(y=y, sr=sr).mean(axis=1)
+    return {
+        "file": str(path),
+        "tempo": float(np.atleast_1d(tempo)[0]),
+        "rms": librosa.feature.rms(y=y).mean(),
+        "centroid": librosa.feature.spectral_centroid(y=y, sr=sr).mean(),
+        "zcr": librosa.feature.zero_crossing_rate(y).mean(),
+        "dur": librosa.get_duration(path=path),
+        **{f"mfcc{i}": v for i, v in enumerate(mfcc.mean(axis=1))},
+        **{f"chroma{i}": v for i, v in enumerate(chroma)},
+    }
+
+df = pd.DataFrame(Parallel(n_jobs=-1)(delayed(features)(p) for p in TRACKS))
+df.to_csv("features.csv", index=False)
+
+# --- кластеризация ---
+X = StandardScaler().fit_transform(df.drop(columns="file"))
+X = PCA(n_components=0.95).fit_transform(X)       # убираем шум и коррелирующие признаки
+df["cluster"] = KMeans(n_clusters=ALBUM_SIZE, n_init=10, random_state=0).fit_predict(X)
+df["pc1"] = X[:, 0]
+
+# --- раздача колодой ---
+df = df.sort_values(["cluster", "pc1"]).reset_index(drop=True)
+df["album"] = df.index % N_ALBUMS          # трек i -> альбом i mod 67
+
+# --- порядок внутри альбома: по энергии, потом "волна" ---
+def order(g):
+    g = g.sort_values("rms")
+    lo, hi = g.iloc[: len(g)//2], g.iloc[len(g)//2 :]
+    # чередуем тихие и громкие, начинаем с громкого
+    seq = [r for pair in zip(hi.itertuples(), lo.itertuples()) for r in pair]
+    if len(g) % 2: seq.append(hi.iloc[-1:].itertuples().__next__())
+    return pd.DataFrame(seq).drop(columns="Index", errors="ignore")
+
+# проще и надёжнее: сортировка по энергии со сдвигом
+df["track_no"] = (df.groupby("album")["rms"]
+                    .rank(method="first", ascending=False).astype(int))
+
+df.sort_values(["album", "track_no"]).to_csv("albums.csv", index=False)
+print(df.groupby("album").size().describe())
+
+Дальше можно скопировать файлы по папкам:
+
+python
+import shutil
+for _, r in df.iterrows():
+    d = Path("albums") / f"album_{r.album+1:02d}"
+    d.mkdir(parents=True, exist_ok=True)
+    shutil.copy(r.file, d / f"{r.track_no:02d}_{Path(r.file).name}")
+Что улучшить
+Эмбеддинги вместо ручных признаков. Модели CLAP (laion/clap) или MERT дают гораздо лучшее «ощущение звучания» (вокал, плотность, настроение), чем MFCC. Достаточно подставить их вектор вместо X.
+Тематика текстов. Если есть тексты, можно посчитать эмбеддинги (sentence-transformers) и добавить их в кластеризацию, чтобы в альбоме не было 5 песен про одно и то же.
+Дубликаты. Суно любит делать почти одинаковые треки. Перед раздачей удали пары с очень близкими векторами (косинусное расстояние < 0.05).
+Единый альбом = единая тема. Если нужно, чтобы альбом ещё и ощущался цельным, делай наоборот: сначала крупные группы по настроению (например, 5 «тёмных» и 5 «светлых» наборов), а внутри них раздавай колодой. Тогда альбомы будут разными между собой и разнообразными внутри.
+
+Если расскажешь, в каком формате лежат файлы и есть ли у тебя промпты и теги, могу подогнать код под это.
